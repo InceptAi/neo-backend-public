@@ -21,6 +21,12 @@ public class UIPath {
         this.uiSteps.add(uiStep);
     }
 
+    public UIPath(SemanticActionType semanticActionType, UIStep uiStep) {
+        this.uiSteps = new ArrayList<>();
+        this.uiSteps.add(uiStep);
+        this.semanticActionType = semanticActionType;
+    }
+
 
     public List<UIStep> getUiSteps() {
         return uiSteps;

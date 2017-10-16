@@ -36,12 +36,14 @@ public class UIScreen {
         }
 
         //Create UIScreen / UIElement / UIAction from last stuff
-        UIStep uiStep = getLastUIStep(crawlingInput.getLastScreenTitle(),
+        UIStep uiStep = getLastUIStep(
+                getIdFromPackageAndTitle(packageName, title),
+                crawlingInput.getLastScreenTitle(),
                 crawlingInput.getLastScreenPackageName(),
                 crawlingInput.getLastViewClicked(),
                 crawlingInput.getLastUIAction());
 
-        //Add the uiStep here lastScreen's UIPath and assign to current screen
+        //Add the uiStep to lastScreen's UIPath and assign to current screen
         if (uiStep != null) {
             String lastScreenId = uiStep.getUiScreenId();
             if (!Utils.nullOrEmpty(lastScreenId)) {
@@ -121,7 +123,7 @@ public class UIScreen {
     private List<UIPath> getUIPathBasedOnLastScreenPath(List<UIPath> lastScreenUIPaths, UIStep uiStep) {
         List<UIPath> uiPathList = new ArrayList<>();
         if (lastScreenUIPaths == null || lastScreenUIPaths.isEmpty()) {
-            uiPathList.add(new UIPath(uiStep));
+            uiPathList.add(new UIPath(SemanticActionType.NAVIGATE, uiStep));
         } else {
             for (UIPath uiPath: lastScreenUIPaths) {
                 uiPathList.add(uiPath.addToPath(uiStep));
@@ -130,7 +132,8 @@ public class UIScreen {
         return uiPathList;
     }
 
-    private UIStep getLastUIStep(String lastScreenTitle,
+    private UIStep getLastUIStep(String currentScreenId,
+                                 String lastScreenTitle,
                                  String lastScreenPackageName,
                                  RenderingView lastViewClicked,
                                  String lastAction) {
@@ -151,11 +154,17 @@ public class UIScreen {
         UIScreen lastScreen =  null;
         UIElement lastElement = null;
         UIAction lastUIAction = UIAction.actionStringToEnum(lastAction);
+        String lastScreenId = Utils.EMPTY_STRING;
 
-        if (!Utils.nullOrEmpty(lastScreenTitle)) {
-            lastScreen = UIScreenStore.getInstance().getScreen(lastScreenPackageName, lastScreenTitle);
+        if (!Utils.nullOrEmpty(lastScreenTitle) && !Utils.nullOrEmpty(lastScreenPackageName)) {
+            lastScreenId = getIdFromPackageAndTitle(lastScreenPackageName, lastScreenTitle);
+        }
+        if (Utils.nullOrEmpty(lastScreenId) || lastScreenId.equalsIgnoreCase(currentScreenId)) {
+                //No navigation since we are on the same screen
+                return null;
         }
 
+        lastScreen = UIScreenStore.getInstance().getScreen(lastScreenId);
         if (lastScreen == null) { // handle this case later
             return null;
         }

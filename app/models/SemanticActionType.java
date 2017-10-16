@@ -6,7 +6,8 @@ public enum SemanticActionType {
     SEEK("SEEK"),
     EDIT_TEXT("EDIT"),
     SUBMIT("SUBMIT"),
-    SELECT("SELECT");
+    SELECT("SELECT"),
+    NAVIGATE("NAVIGATE");
 
     private String id;
 
