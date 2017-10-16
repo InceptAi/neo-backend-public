@@ -7,6 +7,7 @@ public enum UIAction {
     SCROLL("SCROLL"),
     FOCUS("FOCUS"),
     SELECT("SELECT"),
+    POPUP("POPUP"),
     UNDEFINED("UNDEFINED");
 
     private String id;
@@ -40,6 +41,9 @@ public enum UIAction {
             case "SELECT":
             case "TYPE_VIEW_SELECTED":
                 return SELECT;
+            case "POPUP":
+            case "TYPE_WINDOW_STATE_CHANGED":
+                return POPUP;
         }
         return UNDEFINED;
     }
