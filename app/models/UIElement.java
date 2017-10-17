@@ -1,23 +1,24 @@
 package models;
 
+import storage.SemanticActionStore;
 import util.Utils;
 import util.ViewUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class UIElement {
-
-
     private String id = Utils.EMPTY_STRING;
     private String className = Utils.EMPTY_STRING;
     private String packageName = Utils.EMPTY_STRING;
     private String primaryText = Utils.EMPTY_STRING;
     private List<UIElement> childElements;
     private List<UIAction> uiActions;
-    private List<SemanticAction> semanticActions;
+    private HashMap<String, SemanticAction> semanticActions;
     private List<NavigationalAction> navigationalActions;
     private List<UIStep> lastStepToGetToThisElement;
+    private int numToggleableChildren;
 
     public UIElement() {}
 
@@ -25,11 +26,20 @@ public class UIElement {
         this.className = className;
         this.packageName = packageName;
         this.uiActions = new ArrayList<>();
-        this.semanticActions = new ArrayList<>();
+        this.semanticActions = new HashMap<>();
         this.navigationalActions = new ArrayList<>();
         this.childElements = new ArrayList<>();
         this.lastStepToGetToThisElement = new ArrayList<>();
         this.primaryText = ViewUtils.getTextBasedOnClass(className, primaryText);
+        this.numToggleableChildren = 0;
+    }
+
+    public int getNumToggleableChildren() {
+        return numToggleableChildren;
+    }
+
+    public void setNumToggleableChildren(int numToggleableChildren) {
+        this.numToggleableChildren = numToggleableChildren;
     }
 
     public String getId() {
@@ -55,36 +65,35 @@ public class UIElement {
     public UIElement(RenderingView renderingView) {
         this(renderingView.getClassName(), renderingView.getPackageName(), renderingView.getOverallText());
         //Add UIActions based on view
-        if (renderingView.isClickable()) {
+        if (renderingView.isClickable() || renderingView.isCheckable()) {
             uiActions.add(UIAction.CLICK);
-        }
-        if (renderingView.isCheckable()) {
-            uiActions.add(UIAction.CHECK);
         }
     }
 
 
-    void updateSemanticActions(String screenId, String screenTitle) {
+    void updateSemanticActions(UIScreen uiScreen) {
         for (UIAction uiAction: uiActions) {
-            SemanticAction semanticAction =
-                    new SemanticAction(screenId, id(), uiAction.id(),
-                                        className, screenTitle, getAllText());
-            if (semanticAction.getSemanticActionName().equalsIgnoreCase(SemanticActionType.UNDEFINED.id())) {
-                semanticActions.add(semanticAction);
+            if (semanticActions.get(uiAction.id()) == null) {
+                SemanticAction semanticAction = SemanticAction.create(uiScreen, this, uiAction);
+                if (!SemanticAction.isUndefined(semanticAction)) {
+                    semanticActions.put(uiAction.id(), semanticAction);
+                    SemanticActionStore.getInstance().addSemanticAction(semanticAction);
+                    Utils.printDebug("Adding semantic action: " + semanticAction);
+                }
             }
         }
     }
 
     public void addChildren(UIElement uiElement) {
         this.childElements.add(uiElement);
+        if (ViewUtils.isToggleable(uiElement.getClassName())) {
+            numToggleableChildren++;
+        }
+        numToggleableChildren += uiElement.getNumToggleableChildren();
     }
 
     public void add(UIAction uiAction) {
         this.uiActions.add(uiAction);
-    }
-
-    public void add(SemanticAction semanticAction) {
-        this.semanticActions.add(semanticAction);
     }
 
     public void add(UIStep uiStep) {
@@ -119,10 +128,6 @@ public class UIElement {
         return uiActions;
     }
 
-    public List<SemanticAction> getSemanticActions() {
-        return semanticActions;
-    }
-
     public List<NavigationalAction> getNavigationalActions() {
         return navigationalActions;
     }
@@ -143,7 +148,7 @@ public class UIElement {
         this.uiActions = uiActions;
     }
 
-    public void setSemanticActions(List<SemanticAction> semanticActions) {
+    public void setSemanticActions(HashMap<String, SemanticAction> semanticActions) {
         this.semanticActions = semanticActions;
     }
 
@@ -198,12 +203,13 @@ public class UIElement {
         if (childElements != null && !childElements.isEmpty()) {
             for (UIElement uiElement : childElements) {
                 childTextBuilder.append(uiElement.getPrimaryText());
+                childTextBuilder.append(" ");
             }
         }
-        return childTextBuilder.toString();
+        return childTextBuilder.toString().trim();
     }
 
-    private String getAllText() {
+    public String getAllText() {
         String toReturn = Utils.EMPTY_STRING;
         String childText = getChildText();
         if (!Utils.nullOrEmpty(primaryText)) {
@@ -212,7 +218,7 @@ public class UIElement {
         if (!Utils.nullOrEmpty(childText)) {
             toReturn = toReturn + " " + childText;
         }
-        return toReturn;
+        return toReturn.trim();
     }
 
     boolean isMatchForText(String inputText) {
@@ -222,7 +228,19 @@ public class UIElement {
                 childText.toLowerCase().contains(inputToTest));
     }
 
-
-
+    @Override
+    public String toString() {
+        return "UIElement{" +
+                "id='" + id() + '\'' +
+                ", className='" + className + '\'' +
+                ", packageName='" + packageName + '\'' +
+                ", primaryText='" + primaryText + '\'' +
+                ", childElements=" + childElements +
+                ", uiActions=" + uiActions +
+                ", semanticActions=" + semanticActions +
+                ", navigationalActions=" + navigationalActions +
+                ", lastStepToGetToThisElement=" + lastStepToGetToThisElement +
+                '}';
+    }
 
 }

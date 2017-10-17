@@ -8,11 +8,20 @@ import util.ViewUtils;
 import java.util.*;
 
 public class UIScreen {
+    private String id = Utils.EMPTY_STRING;
     private String packageName = Utils.EMPTY_STRING;
     private String title = Utils.EMPTY_STRING;
     private List<UIPath> uiPaths;
     private HashMap<String, UIElement> uiElements;
     private HashMap<String, String> deviceInfo;
+
+    public String getId() {
+        return id();
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String id() {
         return getScreenId(packageName, title, deviceInfo.toString());
@@ -77,7 +86,7 @@ public class UIScreen {
 
         //Set semantic actions here -- we should only add for stuff that doesn't have navigational action
         for (UIElement uiElement: allActionableElementsList) {
-            uiElement.updateSemanticActions(currentScreenId, title);
+            uiElement.updateSemanticActions(this);
         }
 
         //Create UIScreen / UIElement / UIAction from last stuff
@@ -88,26 +97,34 @@ public class UIScreen {
                 crawlingInput.getLastViewClicked(),
                 crawlingInput.getLastUIAction());
 
+
         //Add the uiStep to lastScreen's UIPath and assign to current screen
         if (!uiStep.isUndefined()) {
-            String lastScreenId = uiStep.getUiScreenId();
+            Utils.printDebug("Last UI Step is " + uiStep.toString());
+            String lastScreenId = uiStep.getSrcScreenId();
             if (!Utils.nullOrEmpty(lastScreenId)) {
                 UIScreen lastScreen = UIScreenStore.getInstance().getScreen(lastScreenId);
                 if (lastScreen != null) {
                     if (uiStep.isInterScreenStep()) {
+                        Utils.printDebug("Navigational UI Step");
                         List<UIPath> lastScreenUiPaths = lastScreen.getUiPaths();
-                        //Add the navigation action for the UI Element
+                        Utils.printDebug("Last screen paths: " + lastScreenUiPaths.toString());
                         UIElement lastElement = lastScreen.findElementById(uiStep.getUiElementId());
                         if (lastElement != null) {
+                            Utils.printDebug("Adding navigational step to element: " + lastElement.toString());
                             lastElement.add(new NavigationalAction(uiStep.getUiActionId(), id()));
                             lastScreen.add(lastElement);
+                            Utils.printDebug("Adding uiStep to lastPaths");
                             uiPaths = getUIPathBasedOnLastScreenPath(lastScreenUiPaths, uiStep);
+                            Utils.printDebug("New UI Path: " + uiPaths.toString());
                         }
                     } else if (uiStep.isWithinSameScreen()) {
+                        Utils.printDebug("Within Screen UI Step");
                         List<String> differingElementIds = getDifferingUIElementIds(lastScreen.uiElements);
                         for (String elementId: differingElementIds) {
                             UIElement differingElement = uiElements.get(elementId);
                             if (differingElement != null) {
+                                Utils.printDebug("Adding last step to get to element: " + differingElement.toString());
                                 differingElement.add(uiStep);
                             }
                         }
@@ -143,7 +160,10 @@ public class UIScreen {
             uiPathList.add(new UIPath(SemanticActionType.NAVIGATE, uiStep));
         } else {
             for (UIPath uiPath: lastScreenUIPaths) {
-                uiPathList.add(uiPath.addToPath(uiStep));
+                UIPath updatedPath = UIPath.createNewPath(uiPath, uiStep);
+                if (updatedPath != null) {
+                    uiPathList.add(updatedPath);
+                }
             }
         }
         return uiPathList;
@@ -219,7 +239,7 @@ public class UIScreen {
         }
 
         //Create a UI Step and add to the path
-        return new UIStep(lastScreen, lastElement, lastUIAction, uiStepType);
+        return new UIStep(lastScreenId, currentScreenId, lastElement.getId(), lastUIAction.id(), uiStepType.id());
     }
 
     public void add(UIPath uiPath) {

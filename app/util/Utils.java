@@ -10,6 +10,7 @@ import java.util.List;
 
 public class Utils {
     public static String EMPTY_STRING = "";
+    public static String PRINT_MODE = "DEBUG";
     public static ObjectNode createResponse(Object response, boolean ok) {
         ObjectNode result = Json.newObject();
         result.put("isSuccessfull", ok);
@@ -31,5 +32,9 @@ public class Utils {
         return Arrays.asList(sentence.split(" "));
     }
 
-
+    public static void printDebug(String stringToPrint) {
+        if (PRINT_MODE.equalsIgnoreCase("DEBUG")) {
+            System.out.println(stringToPrint);
+        }
+    }
 }

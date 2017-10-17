@@ -4,11 +4,11 @@
 
 GET		/		controllers.CrawlController.listScreens()
 GET		/screens		controllers.CrawlController.listScreens()
+GET     /actions        controllers.CrawlController.listActions()
 GET     /:id		controllers.CrawlController.retrieve(id:String)
 POST    /			controllers.CrawlController.create()
 PUT		/		controllers.CrawlController.update()
 DELETE	/:package/:title/:deviceInfo		controllers.CrawlController.delete(package:String, title:String, deviceInfo:String)
-GET     /actions        controllers.CrawlController.listActions()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

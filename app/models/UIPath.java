@@ -7,18 +7,20 @@ public class UIPath {
     private List<UIStep> uiSteps;
     private SemanticActionType semanticActionType = SemanticActionType.UNDEFINED;
 
-    public UIPath(SemanticActionType semanticActionType, List<UIStep> uiSteps) {
-        this.semanticActionType = semanticActionType;
-        this.uiSteps = uiSteps;
-    }
-
-    public UIPath(List<UIStep> uiSteps) {
-        this.uiSteps = uiSteps;
-    }
-
-    public UIPath(UIStep uiStep) {
+    private UIPath(UIPath uiPath) {
         this.uiSteps = new ArrayList<>();
-        this.uiSteps.add(uiStep);
+        for (UIStep uiStep: uiPath.uiSteps) {
+            uiSteps.add(UIStep.copyStep(uiStep));
+        }
+        this.semanticActionType = uiPath.semanticActionType;
+    }
+
+    //Factory
+    private static UIPath copyPath(UIPath uiPath){
+        if (uiPath == null) {
+            return null;
+        }
+        return new UIPath(uiPath);
     }
 
     public UIPath(SemanticActionType semanticActionType, UIStep uiStep) {
@@ -27,6 +29,10 @@ public class UIPath {
         this.semanticActionType = semanticActionType;
     }
 
+    public UIPath(SemanticActionType semanticActionType) {
+        this.semanticActionType = semanticActionType;
+        this.uiSteps = new ArrayList<>();
+    }
 
     public List<UIStep> getUiSteps() {
         return uiSteps;
@@ -36,12 +42,19 @@ public class UIPath {
         return semanticActionType;
     }
 
-    public UIPath addToPath(UIStep uiStep) {
-        if (uiSteps == null) {
-            uiSteps = new ArrayList<>();
+    public static UIPath createNewPath(UIPath uiPath, UIStep uiStep) {
+        if (uiPath == null || uiStep == null) {
+            return null;
         }
-        uiSteps.add(uiStep);
-        return new UIPath(uiSteps);
+        UIPath newUIPath = UIPath.copyPath(uiPath);
+        for (UIStep currentStep: newUIPath.getUiSteps()) {
+            if (currentStep.equals(uiStep)) {
+                //This new step already exists in the path, so can't add again. invalid path.
+                return null;
+            }
+        }
+        newUIPath.uiSteps.add(UIStep.copyStep(uiStep));
+        return newUIPath;
     }
 
     public String getId() {
@@ -49,26 +62,50 @@ public class UIPath {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!UIPath.class.isAssignableFrom(obj.getClass())) {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UIPath)) return false;
 
-        final UIPath other = (UIPath) obj;
+        UIPath uiPath = (UIPath) o;
 
-        return this.hashCode() == other.hashCode();
+        return uiSteps.equals(uiPath.uiSteps);
     }
 
     @Override
     public int hashCode() {
-        StringBuilder idBuilder = new StringBuilder();
-        for (UIStep uiStep: uiSteps) {
-            idBuilder.append(uiStep.getId());
-        }
-        return idBuilder.toString().hashCode();
+        return uiSteps.hashCode();
     }
 
+
+    //    @Override
+//    public boolean equals(Object obj) {
+//        if (obj == null) {
+//            return false;
+//        }
+//        if (!UIPath.class.isAssignableFrom(obj.getClass())) {
+//            return false;
+//        }
+//
+//        final UIPath other = (UIPath) obj;
+//
+//        return this.hashCode() == other.hashCode();
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        StringBuilder idBuilder = new StringBuilder();
+//        for (UIStep uiStep: uiSteps) {
+//            idBuilder.append(uiStep.getId());
+//        }
+//        return idBuilder.toString().hashCode();
+//    }
+
+
+    @Override
+    public String toString() {
+        return "UIPath{" +
+                "uiSteps=" + uiSteps +
+                ", semanticActionType=" + semanticActionType +
+                '}';
+    }
 }

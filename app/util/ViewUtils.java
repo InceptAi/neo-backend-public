@@ -105,7 +105,11 @@ public class ViewUtils {
                 || text.toLowerCase().equals(OFF_TEXT.toLowerCase());
     }
 
-
+    public static boolean isToggleable(String className) {
+        return className.equalsIgnoreCase(SWITCH_CLASS_NAME) ||
+                className.equalsIgnoreCase(CHECK_BOX_CLASS_NAME) ||
+                className.equalsIgnoreCase(CHECKED_TEXT_VIEW_CLASS_NAME);
+    }
 
 }
 

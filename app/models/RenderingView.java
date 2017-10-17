@@ -171,12 +171,13 @@ public class RenderingView {
     }
 
     public String getOverallText() {
+        String textToReturn = Utils.EMPTY_STRING;
         if (!text.equals(NULL_TEXT)) {
-            return text;
+            textToReturn = text;
         } else if (!contentDescription.equals(NULL_TEXT)) {
-            return contentDescription;
+            textToReturn = contentDescription;
         }
-        return Utils.EMPTY_STRING;
+        return textToReturn.trim();
     }
 }
 

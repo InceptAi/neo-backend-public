@@ -2,7 +2,6 @@ package models;
 
 public enum UIAction {
     CLICK("CLICK"),
-    CHECK("CHECK"),
     EDIT_TEXT("EDIT_TEXT"),
     SCROLL("SCROLL"),
     FOCUS("FOCUS"),
@@ -26,9 +25,8 @@ public enum UIAction {
             case "CLICK":
             case "TYPE_VIEW_CLICKED":
             case "TYPE_VIEW_LONG_CLICKED": //TODO find a diff action for LONG CLICKED
-                return CLICK;
             case "CHECK":
-                return CHECK;
+                return CLICK;
             case "EDIT_TEXT":
             case "TYPE_VIEW_TEXT_SELECTION_CHANGED":
             case "TYPE_VIEW_TEXT_CHANGED":
