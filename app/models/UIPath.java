@@ -43,4 +43,32 @@ public class UIPath {
         uiSteps.add(uiStep);
         return new UIPath(uiSteps);
     }
+
+    public String getId() {
+        return String.valueOf(hashCode());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!UIPath.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+
+        final UIPath other = (UIPath) obj;
+
+        return this.hashCode() == other.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        StringBuilder idBuilder = new StringBuilder();
+        for (UIStep uiStep: uiSteps) {
+            idBuilder.append(uiStep.getId());
+        }
+        return idBuilder.toString().hashCode();
+    }
+
 }

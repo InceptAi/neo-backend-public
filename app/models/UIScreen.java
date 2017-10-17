@@ -1,23 +1,21 @@
 package models;
 
 import storage.UIScreenStore;
+import util.MergeUtils;
 import util.Utils;
 import util.ViewUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UIScreen {
     private String packageName = Utils.EMPTY_STRING;
     private String title = Utils.EMPTY_STRING;
     private List<UIPath> uiPaths;
     private HashMap<String, UIElement> uiElements;
-    private DeviceInfo deviceInfo;
+    private HashMap<String, String> deviceInfo;
 
     public String id() {
-        return getIdFromPackageAndTitle(packageName,title);
+        return getScreenId(packageName, title, deviceInfo.toString());
     }
 
     public UIScreen(CrawlingInput crawlingInput) {
@@ -34,32 +32,11 @@ public class UIScreen {
         if (crawlingInput.getRootPackageName() != null) {
             this.packageName = crawlingInput.getRootPackageName();
         }
-
-        //Create UIScreen / UIElement / UIAction from last stuff
-        UIStep uiStep = getLastUIStep(
-                getIdFromPackageAndTitle(packageName, title),
-                crawlingInput.getLastScreenTitle(),
-                crawlingInput.getLastScreenPackageName(),
-                crawlingInput.getLastViewClicked(),
-                crawlingInput.getLastUIAction());
-
-        //Add the uiStep to lastScreen's UIPath and assign to current screen
-        if (uiStep != null) {
-            String lastScreenId = uiStep.getUiScreenId();
-            if (!Utils.nullOrEmpty(lastScreenId)) {
-                UIScreen lastScreen = UIScreenStore.getInstance().getScreen(lastScreenId);
-                if (lastScreen != null) {
-                    List<UIPath> lastScreenUiPaths = lastScreen.getUiPaths();
-                    //Add the navigation action for the UI Element
-                    UIElement lastElement = lastScreen.findElementById(uiStep.getUiElementId());
-                    if (lastElement != null) {
-                        lastElement.add(new NavigationalAction(uiStep.getUiActionId(), id()));
-                        lastScreen.add(lastElement);
-                        uiPaths = getUIPathBasedOnLastScreenPath(lastScreenUiPaths, uiStep);
-                    }
-                }
-            }
+        if (crawlingInput.getDeviceInfo() != null) {
+            this.deviceInfo = crawlingInput.getDeviceInfo();
         }
+
+        String currentScreenId = getScreenId(packageName, title, deviceInfo.toString());
 
         HashMap<Long, UIElement> viewIdToUIElementMap = new HashMap<>();
         for (Map.Entry<Long, RenderingView> entry : crawlingInput.getViewMap().entrySet()) {
@@ -70,7 +47,8 @@ public class UIScreen {
         }
 
         //Second pass to assign created elements
-        List<UIElement> uiElementList = new ArrayList<>();
+        List<UIElement> topLevelElementList = new ArrayList<>();
+        List<UIElement> allActionableElementsList = new ArrayList<>();
         for (Map.Entry<Long, RenderingView> entry : crawlingInput.getViewMap().entrySet()) {
             RenderingView renderingView = entry.getValue();
             if (renderingView.isParentOfClickableView() &&
@@ -86,22 +64,61 @@ public class UIScreen {
             if (parentElement != null && parentView != null && parentView.isClickable()) {
                 parentElement.addChildren(currentElement);
             } else {
-                uiElementList.add(currentElement);
+                topLevelElementList.add(currentElement);
             }
 
-            //Set semantic actions here
-            currentElement.updateSemanticActions(title);
-            if (uiStep != null) {
-                currentElement.add(uiStep);
-            }
+            allActionableElementsList.add(currentElement);
         }
 
-        for (UIElement uiElement: uiElementList) {
+
+        for (UIElement uiElement: topLevelElementList) {
             uiElements.put(uiElement.id(), uiElement);
         }
+
+        //Set semantic actions here -- we should only add for stuff that doesn't have navigational action
+        for (UIElement uiElement: allActionableElementsList) {
+            uiElement.updateSemanticActions(currentScreenId, title);
+        }
+
+        //Create UIScreen / UIElement / UIAction from last stuff
+        UIStep uiStep = getLastUIStep(
+                getScreenId(packageName, title, deviceInfo.toString()),
+                crawlingInput.getLastScreenTitle(),
+                crawlingInput.getLastScreenPackageName(),
+                crawlingInput.getLastViewClicked(),
+                crawlingInput.getLastUIAction());
+
+        //Add the uiStep to lastScreen's UIPath and assign to current screen
+        if (!uiStep.isUndefined()) {
+            String lastScreenId = uiStep.getUiScreenId();
+            if (!Utils.nullOrEmpty(lastScreenId)) {
+                UIScreen lastScreen = UIScreenStore.getInstance().getScreen(lastScreenId);
+                if (lastScreen != null) {
+                    if (uiStep.isInterScreenStep()) {
+                        List<UIPath> lastScreenUiPaths = lastScreen.getUiPaths();
+                        //Add the navigation action for the UI Element
+                        UIElement lastElement = lastScreen.findElementById(uiStep.getUiElementId());
+                        if (lastElement != null) {
+                            lastElement.add(new NavigationalAction(uiStep.getUiActionId(), id()));
+                            lastScreen.add(lastElement);
+                            uiPaths = getUIPathBasedOnLastScreenPath(lastScreenUiPaths, uiStep);
+                        }
+                    } else if (uiStep.isWithinSameScreen()) {
+                        List<String> differingElementIds = getDifferingUIElementIds(lastScreen.uiElements);
+                        for (String elementId: differingElementIds) {
+                            UIElement differingElement = uiElements.get(elementId);
+                            if (differingElement != null) {
+                                differingElement.add(uiStep);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
-    private String getTitle(HashMap<Long, RenderingView> renderingViewHashMap) {
+    private String getTitleFromView(HashMap<Long, RenderingView> renderingViewHashMap) {
         long topTextViewId = 0;
         long topTextViewYCoordinate = Long.MAX_VALUE;
         long topTextViewXCoordinate = Long.MAX_VALUE;
@@ -139,34 +156,46 @@ public class UIScreen {
                                  String lastAction) {
         //Create the last step in UIPath
         //Add navigational action to the last UI Element
+        UIStep undefinedUIStep = new UIStep();
         if (lastViewClicked == null) {
-            return null;
+            return undefinedUIStep;
         }
 
         if (Utils.nullOrEmpty(lastScreenPackageName) || Utils.nullOrEmpty(lastViewClicked.getPackageName())) {
-            return null;
+            return undefinedUIStep;
         }
 
         if (!lastScreenPackageName.toLowerCase().equals(lastViewClicked.getPackageName().toLowerCase())) {
-            return null;
+            return undefinedUIStep;
         }
 
         UIScreen lastScreen =  null;
         UIElement lastElement = null;
         UIAction lastUIAction = UIAction.actionStringToEnum(lastAction);
+        UIStep.UIStepType uiStepType = UIStep.UIStepType.UNDEFINED;
+
         String lastScreenId = Utils.EMPTY_STRING;
 
         if (!Utils.nullOrEmpty(lastScreenTitle) && !Utils.nullOrEmpty(lastScreenPackageName)) {
-            lastScreenId = getIdFromPackageAndTitle(lastScreenPackageName, lastScreenTitle);
+            lastScreenId = getScreenId(lastScreenPackageName, lastScreenTitle, deviceInfo.toString());
         }
-        if (Utils.nullOrEmpty(lastScreenId) || lastScreenId.equalsIgnoreCase(currentScreenId)) {
-                //No navigation since we are on the same screen
-                return null;
+
+
+        if (Utils.nullOrEmpty(lastScreenId)) {
+            //We don't know about the last screen
+            return undefinedUIStep;
+        }
+
+        if (lastScreenId.equalsIgnoreCase(currentScreenId)) {
+            uiStepType = UIStep.UIStepType.WITHIN_SAME_SCREEN;
+        } else {
+            uiStepType = UIStep.UIStepType.TO_ANOTHER_SCREEN;
         }
 
         lastScreen = UIScreenStore.getInstance().getScreen(lastScreenId);
+
         if (lastScreen == null) { // handle this case later
-            return null;
+            return undefinedUIStep;
         }
 
         List <UIElement> matchingElements =  lastScreen.findElementsInScreen(
@@ -190,14 +219,7 @@ public class UIScreen {
         }
 
         //Create a UI Step and add to the path
-        return new UIStep(lastScreen, lastElement, lastUIAction);
-    }
-
-    public UIScreen(String title, DeviceInfo deviceInfo) {
-        this.title = title;
-        this.deviceInfo = deviceInfo;
-        this.uiPaths = new ArrayList<>();
-        this.uiElements = new HashMap<>();
+        return new UIStep(lastScreen, lastElement, lastUIAction, uiStepType);
     }
 
     public void add(UIPath uiPath) {
@@ -221,12 +243,24 @@ public class UIScreen {
         return uiElements;
     }
 
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
     public String getTitle() {
         return title;
     }
 
-    public DeviceInfo getDeviceInfo() {
+    public HashMap<String, String> getDeviceInfo() {
         return deviceInfo;
+    }
+
+    public void setDeviceInfo(HashMap<String, String> deviceInfo) {
+        this.deviceInfo = deviceInfo;
     }
 
     private List<UIElement> findElementsInScreen(String className, String packageName, String text) {
@@ -247,10 +281,51 @@ public class UIScreen {
     }
 
 
-    public static String getIdFromPackageAndTitle(String packageName, String title) {
-        String toHash = packageName.toLowerCase() + "#" + title.replaceAll(" ", "_").toLowerCase();
+    public static String getScreenId(String packageName, String title, String deviceInfo) {
+        String toHash = packageName.toLowerCase() + "#" + title.replaceAll(" ", "_").toLowerCase() + "#" + deviceInfo.replaceAll(" ", "_").toLowerCase();
         int hashCode = (toHash).hashCode();
         return String.valueOf(hashCode);
+    }
+
+    public boolean mergeScreen(UIScreen uiScreen) {
+        if (!this.equals(uiScreen)) {
+            return false;
+        }
+        uiElements = MergeUtils.mergeUIElements(uiElements, uiScreen.getUiElements());
+        uiPaths = MergeUtils.mergeUIPaths(uiPaths, uiScreen.getUiPaths());
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!UIScreen.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+
+        final UIScreen other = (UIScreen) obj;
+
+        return this.hashCode() == other.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.valueOf(getScreenId(packageName, title, deviceInfo.toString()));
+    }
+
+
+    public List<String> getDifferingUIElementIds(HashMap<String, UIElement> otherUIElementsMap) {
+        Set<String> currentElementIds = uiElements.keySet();
+        Set<String> otherElementIds = otherUIElementsMap.keySet();
+        List<String> differingIds = new ArrayList<>();
+        for (String currentId: currentElementIds) {
+            if (!otherElementIds.contains(currentId)) {
+                differingIds.add(currentId);
+            }
+        }
+        return differingIds;
     }
 
 

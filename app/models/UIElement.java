@@ -9,6 +9,7 @@ import java.util.List;
 public class UIElement {
 
 
+    private String id = Utils.EMPTY_STRING;
     private String className = Utils.EMPTY_STRING;
     private String packageName = Utils.EMPTY_STRING;
     private String primaryText = Utils.EMPTY_STRING;
@@ -31,6 +32,22 @@ public class UIElement {
         this.primaryText = ViewUtils.getTextBasedOnClass(className, primaryText);
     }
 
+    public String getId() {
+        return String.valueOf(hashCode());
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setChildElements(List<UIElement> childElements) {
+        this.childElements = childElements;
+    }
+
+    public void setLastStepToGetToThisElement(List<UIStep> lastStepToGetToThisElement) {
+        this.lastStepToGetToThisElement = lastStepToGetToThisElement;
+    }
+
     public String id() {
         return String.valueOf(hashCode());
     }
@@ -47,16 +64,18 @@ public class UIElement {
     }
 
 
-    void updateSemanticActions(String screenTitle) {
+    void updateSemanticActions(String screenId, String screenTitle) {
         for (UIAction uiAction: uiActions) {
-            SemanticAction semanticAction = new SemanticAction(uiAction, className, screenTitle, getAllText());
-            if (semanticAction.getSemanticActionType() != SemanticActionType.UNDEFINED) {
+            SemanticAction semanticAction =
+                    new SemanticAction(screenId, id(), uiAction.id(),
+                                        className, screenTitle, getAllText());
+            if (semanticAction.getSemanticActionName().equalsIgnoreCase(SemanticActionType.UNDEFINED.id())) {
                 semanticActions.add(semanticAction);
             }
         }
     }
 
-    void addChildren(UIElement uiElement) {
+    public void addChildren(UIElement uiElement) {
         this.childElements.add(uiElement);
     }
 
@@ -68,23 +87,23 @@ public class UIElement {
         this.semanticActions.add(semanticAction);
     }
 
-    void add(UIStep uiStep) {
+    public void add(UIStep uiStep) {
         this.lastStepToGetToThisElement.add(uiStep);
     }
 
-    void add(NavigationalAction navigationalAction) {
+    public void add(NavigationalAction navigationalAction) {
         this.navigationalActions.add(navigationalAction);
     }
 
-    String getClassName() {
+    public String getClassName() {
         return className;
     }
 
-    String getPackageName() {
+    public String getPackageName() {
         return packageName;
     }
 
-    String getPrimaryText() {
+    public String getPrimaryText() {
         return primaryText;
     }
 
@@ -160,7 +179,7 @@ public class UIElement {
     }
 
     public boolean isImage() {
-        return ViewUtils.IMAGE_CLASS_NAME.equals(className);
+        return ViewUtils.IMAGE_BUTTON_CLASS_NAME.equals(className);
     }
 
     public boolean isLinearRelativeOrFrameLayout() {
@@ -202,6 +221,8 @@ public class UIElement {
         return (primaryText.toLowerCase().contains(inputToTest) ||
                 childText.toLowerCase().contains(inputToTest));
     }
+
+
 
 
 }

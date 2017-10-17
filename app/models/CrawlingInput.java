@@ -14,6 +14,7 @@ public class CrawlingInput {
     private RenderingView lastViewClicked;
     private String rootPackageName;
     private String lastUIAction;
+    private HashMap<String, String> deviceInfo;
     private HashMap<Long, RenderingView> viewMap;
 
     public CrawlingInput(){}
@@ -21,7 +22,8 @@ public class CrawlingInput {
     public CrawlingInput(int numViews, int rootHeight, int rootWidth, String rootTitle,
                          String lastScreenTitle, String lastScreenPackageName,
                          RenderingView lastViewClicked, String lastUIAction,
-                         String rootPackageName, HashMap<Long, RenderingView> viewMap) {
+                         String rootPackageName, HashMap<String, String> deviceInfo,
+                         HashMap<Long, RenderingView> viewMap) {
         this.numViews = numViews;
         this.rootHeight = rootHeight;
         this.rootWidth = rootWidth;
@@ -31,6 +33,7 @@ public class CrawlingInput {
         this.lastUIAction = lastUIAction;
         this.lastScreenPackageName = lastScreenPackageName;
         this.rootPackageName = rootPackageName;
+        this.deviceInfo = deviceInfo;
         this.viewMap = viewMap;
     }
 
@@ -88,5 +91,13 @@ public class CrawlingInput {
 
     public String getLastScreenTitle() {
         return lastScreenTitle;
+    }
+
+    public HashMap<String, String> getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(HashMap<String, String> deviceInfo) {
+        this.deviceInfo = deviceInfo;
     }
 }

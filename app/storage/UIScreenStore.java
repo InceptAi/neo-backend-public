@@ -19,13 +19,22 @@ public class UIScreenStore {
     }
 
     public UIScreen addScreen(UIScreen uiScreen) {
-        String key = uiScreen.id();
-        uiScreenMap.put(key, uiScreen);
-        return uiScreen;
+        String screenId = uiScreen.id();
+        UIScreen currentScreen = uiScreenMap.get(screenId);
+        if (currentScreen == null) {
+            currentScreen = uiScreen;
+            uiScreenMap.put(screenId, uiScreen);
+        } else {
+            boolean mergeResult = currentScreen.mergeScreen(uiScreen);
+            if (!mergeResult) {
+                System.err.print("Screen merge failed for screen id: " + screenId);
+            }
+        }
+        return currentScreen;
     }
 
-    public UIScreen getScreen(String packageName, String title) {
-        return uiScreenMap.get(UIScreen.getIdFromPackageAndTitle(packageName, title ));
+    public UIScreen getScreen(String packageName, String title, String deviceInfo) {
+        return uiScreenMap.get(UIScreen.getScreenId(packageName, title, deviceInfo));
     }
 
     public UIScreen getScreen(String id) {

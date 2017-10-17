@@ -4,7 +4,7 @@ import models.RenderingView;
 
 public class ViewUtils {
     public static final String TEXT_VIEW_CLASS_NAME = "android.widget.TextView";
-    public static final String IMAGE_CLASS_NAME = "android.widget.ImageButton";
+    public static final String IMAGE_BUTTON_CLASS_NAME = "android.widget.ImageButton";
     public static final String LINEAR_LAYOUT_CLASS_NAME = "android.widget.LinearLayout";
     public static final String FRAME_LAYOUT_CLASS_NAME = "android.widget.FrameLayout";
     public static final String RELATIVE_LAYOUT_CLASS_NAME = "android.widget.RelativeLayout";
@@ -13,6 +13,7 @@ public class ViewUtils {
     public static final String SEEK_BAR_CLASS_NAME = "android.widget.SeekBar";
     public static final String CHECKED_TEXT_VIEW_CLASS_NAME = "android.widget.CheckedTextView";
     public static final String EDIT_TEXT_VIEW_CLASS_NAME = "android.widget.EditText";
+    public static final String BUTTON_CLASS_NAME = "android.widget.Button";
 
     private static final String VIEWPAGER_CLASS = "ViewPager";
     private static final String NULL_STRING = "null";
@@ -35,7 +36,7 @@ public class ViewUtils {
     }
 
     public static boolean isImage(RenderingView renderingView) {
-        return IMAGE_CLASS_NAME.equals(renderingView.getClassName());
+        return IMAGE_BUTTON_CLASS_NAME.equals(renderingView.getClassName());
     }
 
     public static boolean isNotNullValuedString(String target) {
@@ -75,7 +76,7 @@ public class ViewUtils {
                 textToReturn = ViewUtils.isTextOnOrOff(text) ? ON_OFF_TEXT : text;
                 break;
 
-            case ViewUtils.IMAGE_CLASS_NAME:
+            case ViewUtils.IMAGE_BUTTON_CLASS_NAME:
             case ViewUtils.CHECKED_TEXT_VIEW_CLASS_NAME:
                 textToReturn = text;
                 break;
@@ -103,6 +104,8 @@ public class ViewUtils {
         return text.toLowerCase().equals(ON_TEXT.toLowerCase())
                 || text.toLowerCase().equals(OFF_TEXT.toLowerCase());
     }
+
+
 
 }
 

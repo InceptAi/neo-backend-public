@@ -3,10 +3,12 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.CrawlingInput;
+import models.SemanticAction;
 import models.UIScreen;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import storage.SemanticActionStore;
 import storage.UIScreenStore;
 import util.Utils;
 
@@ -55,11 +57,18 @@ public class CrawlController extends Controller {
         return ok(Utils.createResponse(jsonData, true));
     }
 
-    public Result delete(String packageName, String title) {
-        if (!UIScreenStore.getInstance().deleteScreen(UIScreen.getIdFromPackageAndTitle(packageName, title))) {
+    public Result delete(String packageName, String title, String deviceInfo) {
+        if (!UIScreenStore.getInstance().deleteScreen(UIScreen.getScreenId(packageName, title, deviceInfo))) {
             return notFound(Utils.createResponse("Screen with title:" + title + " not found", false));
         }
         return ok(Utils.createResponse("Screen with id:" + title + " deleted", true));
+    }
+
+    public Result listActions() {
+        Set<SemanticAction> result = SemanticActionStore.getInstance().getAllActions();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonData = mapper.convertValue(result, JsonNode.class);
+        return ok(Utils.createResponse(jsonData, true));
     }
 
 }
