@@ -317,22 +317,23 @@ public class UIScreen {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!UIScreen.class.isAssignableFrom(obj.getClass())) {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UIScreen)) return false;
 
-        final UIScreen other = (UIScreen) obj;
+        UIScreen uiScreen = (UIScreen) o;
 
-        return this.hashCode() == other.hashCode();
+        if (!packageName.equals(uiScreen.packageName)) return false;
+        if (!title.equals(uiScreen.title)) return false;
+        return deviceInfo.equals(uiScreen.deviceInfo);
     }
 
     @Override
     public int hashCode() {
-        return Integer.valueOf(getScreenId(packageName, title, deviceInfo.toString()));
+        int result = packageName.hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + deviceInfo.hashCode();
+        return result;
     }
 
 

@@ -129,23 +129,31 @@ public class SemanticAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!SemanticAction.class.isAssignableFrom(obj.getClass())) {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SemanticAction)) return false;
 
-        final SemanticAction other = (SemanticAction) obj;
+        SemanticAction that = (SemanticAction) o;
 
-        return this.hashCode() == other.hashCode();
+        if (!screenTitle.equals(that.screenTitle)) return false;
+        if (!packageName.equals(that.packageName)) return false;
+        if (!semanticActionDescription.equals(that.semanticActionDescription)) return false;
+        if (!semanticActionName.equals(that.semanticActionName)) return false;
+        if (!uiScreenId.equals(that.uiScreenId)) return false;
+        if (!uiElementId.equals(that.uiElementId)) return false;
+        return uiActionId.equals(that.uiActionId);
     }
 
     @Override
     public int hashCode() {
-        String toHash = semanticActionDescription + "#" + semanticActionName + "#" + uiScreenId + "#" + uiElementId + "#" + uiActionId;
-        return toHash.toLowerCase().hashCode();
+        int result = screenTitle.hashCode();
+        result = 31 * result + packageName.hashCode();
+        result = 31 * result + semanticActionDescription.hashCode();
+        result = 31 * result + semanticActionName.hashCode();
+        result = 31 * result + uiScreenId.hashCode();
+        result = 31 * result + uiElementId.hashCode();
+        result = 31 * result + uiActionId.hashCode();
+        return result;
     }
 
     @Override

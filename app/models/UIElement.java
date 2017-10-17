@@ -156,26 +156,47 @@ public class UIElement {
         this.navigationalActions = navigationalActions;
     }
 
-
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!UIElement.class.isAssignableFrom(obj.getClass())) {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UIElement)) return false;
 
-        final UIElement other = (UIElement) obj;
+        UIElement uiElement = (UIElement) o;
 
-        return this.hashCode() == other.hashCode();
+        if (!className.equals(uiElement.className)) return false;
+        if (!packageName.equals(uiElement.packageName)) return false;
+        if (!primaryText.equals(uiElement.primaryText)) return false;
+        return childElements != null ? childElements.equals(uiElement.childElements) : uiElement.childElements == null;
     }
 
     @Override
     public int hashCode() {
-        String textToHash = className.toLowerCase() + "#" + primaryText.replace(" ", "_").toLowerCase() + "#" + getChildText();
-        return textToHash.hashCode();
+        int result = className.hashCode();
+        result = 31 * result + packageName.hashCode();
+        result = 31 * result + primaryText.hashCode();
+        result = 31 * result + (childElements != null ? childElements.hashCode() : 0);
+        return result;
     }
+
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (obj == null) {
+//            return false;
+//        }
+//        if (!UIElement.class.isAssignableFrom(obj.getClass())) {
+//            return false;
+//        }
+//
+//        final UIElement other = (UIElement) obj;
+//
+//        return this.hashCode() == other.hashCode();
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        String textToHash = className.toLowerCase() + "#" + primaryText.replace(" ", "_").toLowerCase() + "#" + getChildText();
+//        return textToHash.hashCode();
+//    }
 
 
     //Helper methods
