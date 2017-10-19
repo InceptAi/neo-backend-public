@@ -65,12 +65,12 @@ public class CrawlController extends Controller {
         }
         return ok(Utils.createResponse("Screen with id:" + title + " deleted", true));
     }
-
-    public Result listActions() {
-        Set<SemanticAction> result = SemanticActionStore.getInstance().getAllActions();
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonData = mapper.convertValue(result, JsonNode.class);
-        return ok(Utils.createResponse(jsonData, true));
-    }
+//
+//    public Result listActions() {
+//        Set<SemanticAction> result = SemanticActionStore.getInstance().getAllActions();
+//        ObjectMapper mapper = new ObjectMapper();
+//        JsonNode jsonData = mapper.convertValue(result, JsonNode.class);
+//        return ok(Utils.createResponse(jsonData, true));
+//    }
 
 }

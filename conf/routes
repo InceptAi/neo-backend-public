@@ -2,13 +2,20 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-GET		/		controllers.CrawlController.listScreens()
-GET		/screens		controllers.CrawlController.listScreens()
-GET     /actions        controllers.CrawlController.listActions()
-GET     /:id		controllers.CrawlController.retrieve(id:String)
-POST    /			controllers.CrawlController.create()
-PUT		/		controllers.CrawlController.update()
-DELETE	/:package/:title/:deviceInfo		controllers.CrawlController.delete(package:String, title:String, deviceInfo:String)
+#Crawling controller
+GET		/		                                    controllers.CrawlController.listScreens()
+GET		/screens		                            controllers.CrawlController.listScreens()
+GET     /screens/:id	                            controllers.CrawlController.retrieve(id:String)
+POST    /			                                controllers.CrawlController.create()
+PUT		/		                                    controllers.CrawlController.update()
+DELETE	/screens/:package/:title/:deviceInfo		controllers.CrawlController.delete(package:String, title:String, deviceInfo:String)
+
+
+#Action controller -- semantic action stuff
+GET     /actions                                                       controllers.ActionController.listActions()
+GET    /actions/:inputText/:packageName/:baseScreenTitle/:deviceInfo   controllers.ActionController.searchActions(inputText:String, packageName:String, baseScreenTitle:String, deviceInfo:String)
+GET    /settings/:inputText/:deviceInfo                                controllers.ActionController.searchSettingActions(inputText:String, deviceInfo:String)
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
