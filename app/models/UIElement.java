@@ -72,7 +72,7 @@ public class UIElement {
     }
 
 
-    void updateSemanticActions(UIScreen uiScreen) {
+    public void updateSemanticActions(UIScreen uiScreen) {
         for (UIAction uiAction: uiActions) {
             if (semanticActions.get(uiAction.id()) == null) {
                 SemanticAction semanticAction = SemanticAction.create(uiScreen, this, uiAction);
@@ -178,27 +178,6 @@ public class UIElement {
         result = 31 * result + (childElements != null ? childElements.hashCode() : 0);
         return result;
     }
-
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (obj == null) {
-//            return false;
-//        }
-//        if (!UIElement.class.isAssignableFrom(obj.getClass())) {
-//            return false;
-//        }
-//
-//        final UIElement other = (UIElement) obj;
-//
-//        return this.hashCode() == other.hashCode();
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        String textToHash = className.toLowerCase() + "#" + primaryText.replace(" ", "_").toLowerCase() + "#" + getChildText();
-//        return textToHash.hashCode();
-//    }
-
 
     //Helper methods
     public boolean isTextView() {

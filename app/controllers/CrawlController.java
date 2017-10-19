@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import util.CrawlingInputParser;
 import views.CrawlingInput;
 import models.SemanticAction;
 import models.UIScreen;
@@ -21,6 +22,7 @@ public class CrawlController extends Controller {
             return badRequest(Utils.createResponse("Expecting Json data", false));
         }
         CrawlingInput crawlingInput = Json.fromJson(json, CrawlingInput.class);
+        //UIScreen screen = CrawlingInputParser.parseCrawlingInput(crawlingInput);
         UIScreen screen = new UIScreen(crawlingInput);
         UIScreen createdScreen = UIScreenStore.getInstance().addScreen(screen);
         JsonNode jsonObject = Json.toJson(createdScreen);

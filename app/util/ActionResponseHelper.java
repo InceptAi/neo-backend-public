@@ -1,4 +1,4 @@
-package views;
+package util;
 
 import akka.actor.dsl.Creators;
 import graph.PathFinder;
@@ -8,6 +8,7 @@ import storage.SemanticActionStore;
 import storage.UIScreenStore;
 import util.Utils;
 import util.ViewUtils;
+import views.*;
 
 import javax.print.attribute.standard.MediaSize;
 import java.util.ArrayList;

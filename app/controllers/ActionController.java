@@ -9,7 +9,7 @@ import play.mvc.Result;
 import storage.SemanticActionStore;
 import util.Utils;
 import views.ActionResponse;
-import views.ActionResponseHelper;
+import util.ActionResponseHelper;
 
 import java.util.Set;
 

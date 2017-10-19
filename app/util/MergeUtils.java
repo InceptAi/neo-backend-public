@@ -1,8 +1,6 @@
 package util;
 
-import models.UIElement;
-import models.UIPath;
-import models.UIScreen;
+import models.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +22,32 @@ public class MergeUtils {
         mergedHashMap.putAll(uiElementHashMapOld);
         mergedHashMap.putAll(uiElementHashMapUpdated);
         return mergedHashMap;
+    }
+
+    public static List<UIPath> getUIPathBasedOnLastScreenPath(List<UIPath> lastScreenUIPaths, UIStep uiStep) {
+        List<UIPath> uiPathList = new ArrayList<>();
+        if (lastScreenUIPaths == null || lastScreenUIPaths.isEmpty()) {
+            uiPathList.add(new UIPath(SemanticActionType.NAVIGATE, uiStep));
+        } else {
+            for (UIPath uiPath: lastScreenUIPaths) {
+                UIPath updatedPath = UIPath.createNewPath(uiPath, uiStep);
+                if (updatedPath != null) {
+                    uiPathList.add(updatedPath);
+                }
+            }
+        }
+        return uiPathList;
+    }
+
+
+    public static List<String> getDifferingUIElementIdsInCurrentScreen(Set<String> currentElementIds, Set<String> otherElementIds) {
+        List<String> differingIds = new ArrayList<>();
+        for (String currentId: currentElementIds) {
+            if (!otherElementIds.contains(currentId)) {
+                differingIds.add(currentId);
+            }
+        }
+        return differingIds;
     }
 
 }

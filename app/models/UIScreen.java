@@ -17,6 +17,11 @@ public class UIScreen {
     private HashMap<String, UIElement> uiElements;
     private HashMap<String, String> deviceInfo;
 
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getId() {
         return id();
     }
@@ -28,6 +33,8 @@ public class UIScreen {
     public String id() {
         return getScreenId(packageName, title, deviceInfo.toString());
     }
+
+    public UIScreen() {}
 
     public UIScreen(CrawlingInput crawlingInput) {
         initialize(crawlingInput);
@@ -246,6 +253,10 @@ public class UIScreen {
         return new UIStep(lastScreenId, currentScreenId, lastElement.getId(), lastUIAction.id(), uiStepType.id());
     }
 
+    public void setUiPaths(List<UIPath> uiPaths) {
+        this.uiPaths = uiPaths;
+    }
+
     public void add(UIPath uiPath) {
         this.uiPaths.add(uiPath);
     }
@@ -287,7 +298,7 @@ public class UIScreen {
         this.deviceInfo = deviceInfo;
     }
 
-    private List<UIElement> findElementsInScreen(String className, String packageName, String text) {
+    public List<UIElement> findElementsInScreen(String className, String packageName, String text) {
         List<UIElement> uiElementList = new ArrayList<>();
         for (UIElement uiElement: uiElements.values()) {
             if (uiElement.getClassName().equals(className) &&
@@ -300,7 +311,7 @@ public class UIScreen {
     }
 
 
-    private UIElement findElementById(String elementId) {
+    public UIElement findElementById(String elementId) {
         return uiElements.get(elementId);
     }
 
