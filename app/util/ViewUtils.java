@@ -1,6 +1,6 @@
 package util;
 
-import models.RenderingView;
+import views.RenderingView;
 
 import java.util.HashMap;
 

@@ -2,7 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import models.CrawlingInput;
+import views.CrawlingInput;
 import models.SemanticAction;
 import models.UIScreen;
 import play.libs.Json;
