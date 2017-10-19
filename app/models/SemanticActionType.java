@@ -18,4 +18,22 @@ public enum SemanticActionType {
     public String id() {
         return id;
     }
+
+    public static SemanticActionType typeStringToEnum(String typeString) {
+        switch (typeString) {
+            case "TOGGLE":
+                return TOGGLE;
+            case "SEEK":
+                return SEEK;
+            case "EDIT":
+                return EDIT_TEXT;
+            case "SUBMIT":
+                return SUBMIT;
+            case "SELECT":
+                return SELECT;
+            case "NAVIGATE":
+                return NAVIGATE;
+        }
+        return UNDEFINED;
+    }
 }

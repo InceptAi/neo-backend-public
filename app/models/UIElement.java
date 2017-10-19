@@ -219,7 +219,7 @@ public class UIElement {
 
 
 
-    private String getChildText() {
+    public String getChildText() {
         StringBuilder childTextBuilder = new StringBuilder();
         if (childElements != null && !childElements.isEmpty()) {
             for (UIElement uiElement : childElements) {

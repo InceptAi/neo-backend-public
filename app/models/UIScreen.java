@@ -185,9 +185,11 @@ public class UIScreen {
             return undefinedUIStep;
         }
 
-        if (!lastScreenPackageName.toLowerCase().equals(lastViewClicked.getPackageName().toLowerCase())) {
-            return undefinedUIStep;
-        }
+        //This is not valid
+        //TODO -- commenting this -- see if it works.
+//        if (!lastScreenPackageName.toLowerCase().equals(lastViewClicked.getPackageName().toLowerCase())) {
+//            return undefinedUIStep;
+//        }
 
         UIScreen lastScreen =  null;
         UIElement lastElement = null;

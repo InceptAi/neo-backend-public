@@ -2,6 +2,8 @@ package util;
 
 import models.RenderingView;
 
+import java.util.HashMap;
+
 public class ViewUtils {
     public static final String TEXT_VIEW_CLASS_NAME = "android.widget.TextView";
     public static final String IMAGE_BUTTON_CLASS_NAME = "android.widget.ImageButton";
@@ -19,17 +21,49 @@ public class ViewUtils {
     private static final String NULL_STRING = "null";
 
     //On/off
-    private static String ON_TEXT = "on";
-    private static String OFF_TEXT = "off";
+    public  static String ON_TEXT = "on";
+    public static String OFF_TEXT = "off";
 
     //Texts
-    private static String SWITCH_TEXT = "SWITCH_ON_OFF";
-    private static String ON_OFF_TEXT = "TEXT_ON_OFF";
-    private static String CHECK_BOX_TEXT = "CHECK_BOX_ON_OFF";
-    private static String SEEK_BAR_TEXT = "SEEK_BAR_VALUE";
-    private static String EDIT_TEXT_VIEW_TEXT = "EDIT_TEXT_VIEW_TEXT";
+    public static String SWITCH_TEXT = "SWITCH_ON_OFF";
+    public static String ON_OFF_TEXT = "TEXT_ON_OFF";
+    public static String CHECK_BOX_TEXT = "CHECK_BOX_ON_OFF";
+    public static String SEEK_BAR_TEXT = "SEEK_BAR_VALUE";
+    public static String EDIT_TEXT_VIEW_TEXT = "EDIT_TEXT_VIEW_TEXT";
+
+    public static final HashMap<String , String> ON_MAP = new HashMap<String , String>() {{
+        put(ViewUtils.SWITCH_TEXT,    "on");
+        put(ViewUtils.ON_OFF_TEXT, "on");
+    }};
+
+    public static final HashMap<String , String> OFF_MAP = new HashMap<String , String>() {{
+        put(ViewUtils.SWITCH_TEXT,    "off");
+        put(ViewUtils.ON_OFF_TEXT, "off");
+    }};
+
+    public static final HashMap<String , String> ENABLE_MAP = new HashMap<String , String>() {{
+        put(ViewUtils.SWITCH_TEXT,    "enable");
+        put(ViewUtils.ON_OFF_TEXT, "enable");
+    }};
+
+    public static final HashMap<String , String> DISABLE_MAP = new HashMap<String , String>() {{
+        put(ViewUtils.SWITCH_TEXT,    "disable");
+        put(ViewUtils.ON_OFF_TEXT, "disable");
+    }};
+
 
     private ViewUtils() {}
+
+    public static HashMap<String, String> getMapForOnOffTemplateReplacement(String replacementText) {
+        if (Utils.nullOrEmpty(replacementText)) {
+            return new HashMap<>();
+        }
+
+        return new HashMap<String , String>() {{
+            put(ViewUtils.SWITCH_TEXT,    replacementText.toLowerCase());
+            put(ViewUtils.ON_OFF_TEXT, replacementText.toLowerCase());
+        }};
+    }
 
     public static boolean isTextView(RenderingView renderingView) {
         return TEXT_VIEW_CLASS_NAME.equals(renderingView.getClassName());

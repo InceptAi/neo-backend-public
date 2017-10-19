@@ -3,8 +3,8 @@ package models;
 import util.Utils;
 import util.ViewUtils;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SemanticAction {
@@ -15,6 +15,7 @@ public class SemanticAction {
     private String uiScreenId;
     private String uiElementId;
     private String uiActionId;
+    private String deviceInfo;
 
     private SemanticAction(UIScreen uiScreen, UIElement uiElement, UIAction uiAction) {
         //Utils.printDebug("Adding semantic action with className:" + className + " elementText:" + elementText);
@@ -58,6 +59,7 @@ public class SemanticAction {
         this.uiActionId = uiAction.id();
         this.screenTitle = uiScreen.getTitle();
         this.packageName = uiScreen.getPackageName();
+        this.deviceInfo = uiScreen.getDeviceInfo().toString();
     }
 
 
@@ -70,6 +72,7 @@ public class SemanticAction {
         uiActionId = Utils.EMPTY_STRING;
         screenTitle = Utils.EMPTY_STRING;
         packageName = Utils.EMPTY_STRING;
+        deviceInfo = Utils.EMPTY_STRING;
     }
 
     /**
@@ -141,6 +144,7 @@ public class SemanticAction {
         if (!semanticActionName.equals(that.semanticActionName)) return false;
         if (!uiScreenId.equals(that.uiScreenId)) return false;
         if (!uiElementId.equals(that.uiElementId)) return false;
+        if (!deviceInfo.equals(that.deviceInfo)) return false;
         return uiActionId.equals(that.uiActionId);
     }
 
@@ -153,6 +157,7 @@ public class SemanticAction {
         result = 31 * result + uiScreenId.hashCode();
         result = 31 * result + uiElementId.hashCode();
         result = 31 * result + uiActionId.hashCode();
+        result = 31 * result + deviceInfo.hashCode();
         return result;
     }
 
@@ -166,6 +171,7 @@ public class SemanticAction {
                 ", uiScreenId='" + uiScreenId + '\'' +
                 ", uiElementId='" + uiElementId + '\'' +
                 ", uiActionId='" + uiActionId + '\'' +
+                ", deviceInfo='" + deviceInfo + '\'' +
                 '}';
     }
 
@@ -184,6 +190,33 @@ public class SemanticAction {
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
+
+    public String getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public void setDeviceInfo(String deviceInfo) {
+        this.deviceInfo = deviceInfo;
+    }
+
+    public List<String> getStringsToMatch() {
+        List<String> stringList = new ArrayList<>();
+        SemanticActionType semanticActionType = SemanticActionType.typeStringToEnum(semanticActionName);
+        String commonString = screenTitle + " "  + semanticActionDescription;
+        switch (semanticActionType) {
+            case TOGGLE:
+                //Generate text for on/off/enable/disable etc.
+                List<String> replacementWords = Arrays.asList("on", "off", "enable", "disable");
+                for (String replacementWord: replacementWords) {
+                    stringList.add(Utils.replaceWord(commonString, ViewUtils.getMapForOnOffTemplateReplacement(replacementWord)));
+                }
+                break;
+            default:
+                break;
+        }
+        return stringList;
+    }
+
 
     public static boolean isUndefined(SemanticAction semanticAction) {
         return semanticAction.getSemanticActionName().equalsIgnoreCase(SemanticActionType.UNDEFINED.id());

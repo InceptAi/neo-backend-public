@@ -84,4 +84,33 @@ public class UIPath {
                 ", semanticActionType=" + semanticActionType +
                 '}';
     }
+
+    public int length() {
+        return uiSteps.size();
+    }
+
+
+    public static UIPath findSubPath(UIPath uiPath, String srcScreenId) {
+        if (uiPath == null) {
+            return null;
+        }
+        int pathLength = uiPath.length();
+        int srcIndex = -1;
+        for (int stepIndex = 0; stepIndex < pathLength; stepIndex++) {
+            UIStep uiStep = uiPath.uiSteps.get(stepIndex);
+            if (uiStep.getSrcScreenId().equalsIgnoreCase(srcScreenId)) {
+                srcIndex = stepIndex;
+            }
+        }
+        if (srcIndex == -1) {
+            //Didn't find src, return null
+            return null;
+        }
+        UIPath subPath = new UIPath(SemanticActionType.NAVIGATE);
+        for (int stepIndex = srcIndex; stepIndex < pathLength; stepIndex++) {
+            UIStep uiStep = uiPath.uiSteps.get(stepIndex);
+            subPath.uiSteps.add(UIStep.copyStep(uiStep));
+        }
+        return subPath;
+    }
 }
