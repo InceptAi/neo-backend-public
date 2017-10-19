@@ -45,6 +45,10 @@ public class SemanticActionStore {
         String minIdInserted = Utils.EMPTY_STRING;
 
         for (SemanticAction semanticAction: semanticActionMap.values()) {
+            if (!Utils.nullOrEmpty(deviceInfo) && !semanticAction.getDeviceInfo().equalsIgnoreCase(deviceInfo)) {
+                //Match the device info here
+                return new HashMap<>();
+            }
             List<String> referenceStringList = semanticAction.getStringsToMatch();
             double bestMatchMetric = 0;
             String bestMatchingString = Utils.EMPTY_STRING;

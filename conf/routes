@@ -13,8 +13,10 @@ DELETE	/screens/:package/:title/:deviceInfo		controllers.CrawlController.delete(
 
 #Action controller -- semantic action stuff
 GET     /actions                                                       controllers.ActionController.listActions()
-GET    /actions/:inputText/:packageName/:baseScreenTitle/:deviceInfo   controllers.ActionController.searchActions(inputText:String, packageName:String, baseScreenTitle:String, deviceInfo:String)
+GET    /actions/:inputText/:packageName/:baseScreenTitle               controllers.ActionController.searchActions(inputText:String, packageName:String, baseScreenTitle:String, deviceInfo:String)
+GET    /actions/:inputText/:packageName/:baseScreenTitle/:deviceInfo   controllers.ActionController.searchActions(inputText:String, packageName:String, baseScreenTitle:String)
 GET    /settings/:inputText/:deviceInfo                                controllers.ActionController.searchSettingActions(inputText:String, deviceInfo:String)
+GET    /settings/:inputText                                            controllers.ActionController.searchSettingActions(inputText:String)
 
 
 # Map static resources from the /public folder to the /assets URL path
