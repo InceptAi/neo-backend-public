@@ -32,15 +32,6 @@ public class ActionController extends Controller {
         return ok(Utils.createResponse(jsonData, true));
     }
 
-
-    public Result searchActions(String inputText, String packageName, String baseScreenTitle) {
-        ActionResponse actionResponse = ActionResponseHelper.createActionResponse(inputText, packageName,
-                baseScreenTitle, Utils.EMPTY_STRING, new SimplePathFinder());
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonData = mapper.convertValue(actionResponse, JsonNode.class);
-        return ok(Utils.createResponse(jsonData, true));
-    }
-
     public Result searchSettingActions(String inputText, String deviceInfo) {
         ActionResponse actionResponse = ActionResponseHelper.createActionResponse(inputText, SETTINGS_PACKAGE_NAME,
                 SETTINGS_TITLE, deviceInfo, new SimplePathFinder());
@@ -49,13 +40,5 @@ public class ActionController extends Controller {
         return ok(Utils.createResponse(jsonData, true));
     }
 
-
-    public Result searchSettingActions(String inputText) {
-        ActionResponse actionResponse = ActionResponseHelper.createActionResponse(inputText, SETTINGS_PACKAGE_NAME,
-                SETTINGS_TITLE, Utils.EMPTY_STRING, new SimplePathFinder());
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonData = mapper.convertValue(actionResponse, JsonNode.class);
-        return ok(Utils.createResponse(jsonData, true));
-    }
 
 }

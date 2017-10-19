@@ -8,15 +8,13 @@ GET		/screens		                            controllers.CrawlController.listScree
 GET     /screens/:id	                            controllers.CrawlController.retrieve(id:String)
 POST    /			                                controllers.CrawlController.create()
 PUT		/		                                    controllers.CrawlController.update()
-DELETE	/screens/:package/:title/:deviceInfo		controllers.CrawlController.delete(package:String, title:String, deviceInfo:String)
+DELETE	/screens/:package/:title/:device		    controllers.CrawlController.delete(package:String, title:String, device:String)
 
 
 #Action controller -- semantic action stuff
-GET     /actions                                                       controllers.ActionController.listActions()
-GET    /actions/:inputText/:packageName/:baseScreenTitle               controllers.ActionController.searchActions(inputText:String, packageName:String, baseScreenTitle:String, deviceInfo:String)
-GET    /actions/:inputText/:packageName/:baseScreenTitle/:deviceInfo   controllers.ActionController.searchActions(inputText:String, packageName:String, baseScreenTitle:String)
-GET    /settings/:inputText/:deviceInfo                                controllers.ActionController.searchSettingActions(inputText:String, deviceInfo:String)
-GET    /settings/:inputText                                            controllers.ActionController.searchSettingActions(inputText:String)
+GET    /actions/all                             controllers.ActionController.listActions()
+GET    /actions/:input/:pkg/:title/              controllers.ActionController.searchActions(input, pkg, title, device: String ?= "")
+GET    /settings/:input/                         controllers.ActionController.searchSettingActions(input, device: String ?= "")
 
 
 # Map static resources from the /public folder to the /assets URL path
