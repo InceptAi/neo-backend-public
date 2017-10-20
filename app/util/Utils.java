@@ -50,6 +50,7 @@ public class Utils {
     }
 
     public static String replaceWord(String inputSentence, HashMap<String, String> replacementMap) {
+        Utils.printDebug("In replaceWord, replacing: " + inputSentence);
         if (inputSentence == null) {
             return null;
         }
@@ -64,11 +65,44 @@ public class Utils {
             String replacementWord = replacementMap.get(word.toLowerCase());
             if (replacementWord != null) {
                 replacedSentenceBuilder.append(replacementWord);
+                replacedSentenceBuilder.append(" ");
             } else {
                 replacedSentenceBuilder.append(word);
+                replacedSentenceBuilder.append(" ");
             }
         }
-        return replacedSentenceBuilder.toString().toLowerCase();
+        Utils.printDebug("In replaceWord, output: " + replacedSentenceBuilder.toString().trim().toLowerCase());
+        return replacedSentenceBuilder.toString().trim().toLowerCase();
+    }
+
+    public static List<String> replaceSwitchTemplateWordsWithPotentialOptions(String inputText) {
+        if (nullOrEmpty(inputText)) {
+            return new ArrayList<>();
+        }
+        List<String> list = new ArrayList<>();
+        //TODO: We should send down regex for matching text
+        list.add(replaceWord(inputText, ViewUtils.getMapForOnOffTemplateReplacement("on")));
+        list.add(replaceWord(inputText, ViewUtils.getMapForOnOffTemplateReplacement("off")));
+        //TODO: handle check box, seek bar and other stuff
+        //TODO: remove duplicates from the final string -- make sure each element in the list has no duplicates
+        return list;
+    }
+
+    public static String removeDuplicateWords(String input) {
+        if (nullOrEmpty(input)) {
+            return input;
+        }
+        StringBuilder toReturn = new StringBuilder();
+        HashSet<String> stringHashSet = new HashSet<>();
+        List<String> inputWords = Arrays.asList(input.split(" "));
+        for (String word: inputWords) {
+            if (!stringHashSet.contains(word)) {
+                stringHashSet.add(word);
+                toReturn.append(word);
+                toReturn.append(" ");
+            }
+        }
+        return toReturn.toString().trim().toLowerCase();
     }
 
     public static <K, V extends Comparable<? super V>> Map<K, V>

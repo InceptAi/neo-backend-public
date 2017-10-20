@@ -1,7 +1,6 @@
 package storage;
 
 import models.*;
-import nlu.SimpleTextInterpreter;
 import nlu.TextInterpreter;
 import util.Utils;
 
@@ -49,7 +48,7 @@ public class SemanticActionStore {
                 //Match the device info here
                 return new HashMap<>();
             }
-            List<String> referenceStringList = semanticAction.getStringsToMatch();
+            List<String> referenceStringList = semanticAction.fetchStringsToMatch();
             double bestMatchMetric = 0;
             String bestMatchingString = Utils.EMPTY_STRING;
             for (String referenceString: referenceStringList) {

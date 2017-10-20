@@ -1,11 +1,9 @@
 package storage;
 
 import models.UIScreen;
+import util.Utils;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class UIScreenStore {
     private static UIScreenStore instance;
@@ -34,7 +32,20 @@ public class UIScreenStore {
     }
 
     public UIScreen getScreen(String packageName, String title, String deviceInfo) {
+        if (Utils.nullOrEmpty(deviceInfo)) {
+            return getScreen(packageName, title);
+        }
         return uiScreenMap.get(UIScreen.getScreenId(packageName, title, deviceInfo));
+    }
+
+    private UIScreen getScreen(String packageName, String title) {
+        Set<UIScreen> uiScreens = new HashSet<>(uiScreenMap.values());
+        for (UIScreen uiScreen: uiScreens) {
+            if (uiScreen.getPackageName().equalsIgnoreCase(packageName) && uiScreen.getTitle().equalsIgnoreCase(title)) {
+                return uiScreen;
+            }
+        }
+        return null;
     }
 
     public UIScreen getScreen(String id) {

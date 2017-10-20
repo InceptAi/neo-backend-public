@@ -60,8 +60,8 @@ public class ViewUtils {
         }
 
         return new HashMap<String , String>() {{
-            put(ViewUtils.SWITCH_TEXT,    replacementText.toLowerCase());
-            put(ViewUtils.ON_OFF_TEXT, replacementText.toLowerCase());
+            put(ViewUtils.SWITCH_TEXT.trim().toLowerCase(), replacementText.toLowerCase());
+            put(ViewUtils.ON_OFF_TEXT.trim().toLowerCase(), replacementText.toLowerCase());
         }};
     }
 

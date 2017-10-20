@@ -35,19 +35,20 @@ public class ActionResponseHelper {
             SemanticAction semanticAction = SemanticActionStore.getInstance().getAction(actionId);
             UIScreen dstScreen = UIScreenStore.getInstance().getScreen(semanticAction.getUiScreenId());
             UIScreen srcScreen = UIScreenStore.getInstance().getScreen(startingScreen.getId());
-            if (dstScreen == null || srcScreen == null) {
-                return null;
+            UIElement uiElement = dstScreen.getUiElements().get(semanticAction.getUiElementId());
+            if (srcScreen == null || dstScreen == null || uiElement == null) {
+                return new ActionResponse();
             }
             UIPath navigationPathBetweenScreens = pathFinder.findPathBetweenScreens(srcScreen, dstScreen);
             //Create navigation list
             List<NavigationIdentifier> navigationIdentifierList = getNavigationPathForClient(navigationPathBetweenScreens);
             //Last step
             ScreenIdentifier dstScreenIdentifier = new ScreenIdentifier(dstScreen.getTitle(), dstScreen.getPackageName());
-            UIElement uiElement = srcScreen.getUiElements().get(semanticAction.getUiElementId());
-            ElementIdentifier elementIdentifier = new ElementIdentifier(uiElement.getClassName(), uiElement.getPackageName(),
-                    uiElement.getPrimaryText(), uiElement.getChildText());
+            ElementIdentifier elementIdentifier = createElementIdentifier(uiElement.getClassName(), uiElement.getPackageName(),
+                    uiElement.getPrimaryText(), uiElement.getChildText()); //
+
             ActionIdentifier actionIdentifier = new ActionIdentifier(dstScreenIdentifier, elementIdentifier, description,
-                    semanticAction.getUiActionId());
+                    semanticAction.getSemanticActionName());
             //Create the condition to check for success
             Condition successCondition = create(semanticAction, description);
             ActionDetails actionDetails = new ActionDetails(successCondition, navigationIdentifierList, actionIdentifier);
@@ -55,7 +56,6 @@ public class ActionResponseHelper {
         }
         return new ActionResponse(actionDetailsList);
     }
-
 
     public static List<NavigationIdentifier> getNavigationPathForClient(UIPath uiPath) {
         if (uiPath == null) {
@@ -71,14 +71,22 @@ public class ActionResponseHelper {
             }
             ScreenIdentifier srcIdentifier = new ScreenIdentifier(srcScreen.getTitle(), srcScreen.getPackageName());
             ScreenIdentifier dstIdentifier = new ScreenIdentifier(dstScreen.getTitle(), dstScreen.getPackageName());
-            ElementIdentifier elementIdentifier = new ElementIdentifier(uiElement.getClassName(),
-                    uiElement.getPackageName(), uiElement.getPrimaryText(), uiElement.getChildText());
+            ElementIdentifier elementIdentifier = createElementIdentifier(uiElement.getClassName(), uiElement.getPackageName(),
+                    uiElement.getPrimaryText(), uiElement.getChildText()); //
             NavigationIdentifier navigationIdentifier = new NavigationIdentifier(srcIdentifier, dstIdentifier,
                     elementIdentifier, uiStep.getUiActionId());
             navigationIdentifierList.add(navigationIdentifier);
         }
         return navigationIdentifierList;
     }
+
+    public static ElementIdentifier createElementIdentifier(String className, String packageName,
+                                                            String primaryText, String childText) {
+        List<String> primaryTextList = Utils.replaceSwitchTemplateWordsWithPotentialOptions(primaryText);
+        List<String> childTextList = Utils.replaceSwitchTemplateWordsWithPotentialOptions(childText);
+        return new ElementIdentifier(className, packageName, primaryTextList, childTextList);
+    }
+
 
     public static Condition create(SemanticAction semanticAction, String matchingDescription) {
         Condition condition = null;

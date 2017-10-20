@@ -199,7 +199,7 @@ public class SemanticAction {
         this.deviceInfo = deviceInfo;
     }
 
-    public List<String> getStringsToMatch() {
+    public List<String> fetchStringsToMatch() {
         List<String> stringList = new ArrayList<>();
         SemanticActionType semanticActionType = SemanticActionType.typeStringToEnum(semanticActionName);
         String commonString = screenTitle + " "  + semanticActionDescription;
