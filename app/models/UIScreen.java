@@ -34,7 +34,11 @@ public class UIScreen {
         return getScreenId(packageName, title, deviceInfo.toString());
     }
 
-    public UIScreen() {}
+    public UIScreen() {
+        this.uiPaths = new ArrayList<>();
+        this.uiElements = new HashMap<>();
+        this.deviceInfo = new HashMap<>();
+    }
 
     public UIScreen(CrawlingInput crawlingInput) {
         initialize(crawlingInput);

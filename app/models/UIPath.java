@@ -52,6 +52,11 @@ public class UIPath {
                 //This new step already exists in the path, so can't add again. invalid path.
                 return null;
             }
+            //TODO -- think about this, I think we need this path for reverse lookup
+//            if (currentStep.getSrcScreenId().equals(uiStep.getDstScreenId())) {
+//                //New UI steps dst already exists as a src in the path, so invalid path (X, Y), (Y, Z), (Z, X) -- avoid paths like this
+//                return null;
+//            } 
         }
         newUIPath.uiSteps.add(UIStep.copyStep(uiStep));
         return newUIPath;

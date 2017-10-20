@@ -22,8 +22,8 @@ public class CrawlController extends Controller {
             return badRequest(Utils.createResponse("Expecting Json data", false));
         }
         CrawlingInput crawlingInput = Json.fromJson(json, CrawlingInput.class);
-        //UIScreen screen = CrawlingInputParser.parseCrawlingInput(crawlingInput);
-        UIScreen screen = new UIScreen(crawlingInput);
+        UIScreen screen = CrawlingInputParser.parseCrawlingInput(crawlingInput);
+        //UIScreen screen = new UIScreen(crawlingInput);
         UIScreen createdScreen = UIScreenStore.getInstance().addScreen(screen);
         JsonNode jsonObject = Json.toJson(createdScreen);
         return created(Utils.createResponse(jsonObject, true));
@@ -65,12 +65,4 @@ public class CrawlController extends Controller {
         }
         return ok(Utils.createResponse("Screen with id:" + title + " deleted", true));
     }
-//
-//    public Result listActions() {
-//        Set<SemanticAction> result = SemanticActionStore.getInstance().getAllActions();
-//        ObjectMapper mapper = new ObjectMapper();
-//        JsonNode jsonData = mapper.convertValue(result, JsonNode.class);
-//        return ok(Utils.createResponse(jsonData, true));
-//    }
-
 }
