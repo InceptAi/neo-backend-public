@@ -31,7 +31,7 @@ public class CrawlingInputParser {
         for (Map.Entry<Long, RenderingView> entry : crawlingInput.getViewMap().entrySet()) {
             RenderingView renderingView = entry.getValue();
             //Create a UI element from the view -- no child text / no semantic / or navigational stuff for now
-            UIElement uiElement = new UIElement(renderingView);
+            UIElement uiElement = createUIElementFromRenderingView(renderingView);
             viewIdToUIElementMap.put(renderingView.getFlatViewId(), uiElement);
         }
 
@@ -192,4 +192,13 @@ public class CrawlingInputParser {
         return new UIStep(lastScreenId, currentScreen.getId(), lastElement.getId(), lastUIAction.id(), uiStepType.id());
     }
 
+    public static UIElement createUIElementFromRenderingView(RenderingView renderingView) {
+        UIElement uiElement = new UIElement(renderingView.getClassName(),
+                renderingView.getPackageName(), renderingView.getOverallText());
+        //Add UIActions based on view
+        if (renderingView.isClickable() || renderingView.isCheckable()) {
+            uiElement.add(UIAction.CLICK);
+        }
+        return uiElement;
+    }
 }

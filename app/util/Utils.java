@@ -121,4 +121,11 @@ public class Utils {
         }
         return result;
     }
+
+    public static String sanitizeText(String input) {
+        if (nullOrEmpty(input)) {
+            return input;
+        }
+        return input.replaceAll("[^\\w\\s]","").trim().toLowerCase();
+    }
 }

@@ -1,5 +1,7 @@
 package views;
 
+import util.Utils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +44,7 @@ public class CrawlingInput {
     }
 
     public String getRootTitle() {
-        return rootTitle;
+        return Utils.sanitizeText(rootTitle);
     }
 
     public int getNumViews() {

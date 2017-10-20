@@ -41,11 +41,11 @@ public class RenderingView {
     }
 
     public String getText() {
-        return text;
+        return Utils.sanitizeText(text);
     }
 
     public String getContentDescription() {
-        return contentDescription;
+        return Utils.sanitizeText(contentDescription);
     }
 
     public String getViewIdResourceName() {
@@ -177,7 +177,7 @@ public class RenderingView {
         } else if (!contentDescription.equals(NULL_TEXT)) {
             textToReturn = contentDescription;
         }
-        return textToReturn.trim();
+        return Utils.sanitizeText(textToReturn);
     }
 }
 
