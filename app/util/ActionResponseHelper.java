@@ -1,16 +1,12 @@
 package util;
 
-import akka.actor.dsl.Creators;
 import graph.PathFinder;
 import models.*;
 import nlu.SimpleTextInterpreter;
 import storage.SemanticActionStore;
 import storage.UIScreenStore;
-import util.Utils;
-import util.ViewUtils;
 import views.*;
 
-import javax.print.attribute.standard.MediaSize;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

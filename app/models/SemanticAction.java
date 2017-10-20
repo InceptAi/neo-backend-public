@@ -39,7 +39,7 @@ public class SemanticAction {
 //            case ViewUtils.SWITCH_CLASS_NAME:
 //            case ViewUtils.CHECK_BOX_CLASS_NAME:
 //                actionDescription = ViewUtils.isTemplateText(elementText) ? screenTitle : elementText;
-//                actionName = SemanticActionType.TOGGLE.id();
+//                actionName = SemanticActionType.TOGGLE.getId();
 //                break;
             case ViewUtils.SEEK_BAR_CLASS_NAME:
                 actionName = SemanticActionType.SEEK.id();
@@ -54,7 +54,7 @@ public class SemanticAction {
         }
         this.semanticActionDescription = uiElement.getAllText();
         this.semanticActionName = actionName;
-        this.uiScreenId = uiScreen.id();
+        this.uiScreenId = uiScreen.getId();
         this.uiElementId = uiElement.id();
         this.uiActionId = uiAction.id();
         this.screenTitle = uiScreen.getTitle();

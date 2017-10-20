@@ -1,9 +1,6 @@
 package models;
 
-import storage.SemanticActionStore;
 import util.Utils;
-import util.ViewUtils;
-import views.RenderingView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,10 +17,11 @@ public class UIElement {
     private List<NavigationalAction> navigationalActions;
     private List<UIStep> lastStepToGetToThisElement;
     private int numToggleableChildren;
+    private boolean isToggleable;
 
     public UIElement() {}
 
-    public UIElement(String className, String packageName, String primaryText) {
+    public UIElement(String className, String packageName, String primaryText, boolean isToggleable) {
         this.className = className;
         this.packageName = packageName;
         this.uiActions = new ArrayList<>();
@@ -31,8 +29,21 @@ public class UIElement {
         this.navigationalActions = new ArrayList<>();
         this.childElements = new ArrayList<>();
         this.lastStepToGetToThisElement = new ArrayList<>();
-        this.primaryText = ViewUtils.getTextBasedOnClass(className, primaryText);
+        this.primaryText = primaryText;
         this.numToggleableChildren = 0;
+        this.isToggleable = isToggleable;
+    }
+
+    public HashMap<String, SemanticAction> getSemanticActions() {
+        return semanticActions;
+    }
+
+    public boolean isToggleable() {
+        return isToggleable;
+    }
+
+    public void setIsToggleable(boolean toggleable) {
+        this.isToggleable = toggleable;
     }
 
     public int getNumToggleableChildren() {
@@ -63,31 +74,22 @@ public class UIElement {
         return String.valueOf(hashCode());
     }
 
-    public UIElement(RenderingView renderingView) {
-        this(renderingView.getClassName(), renderingView.getPackageName(), renderingView.getOverallText());
-        //Add UIActions based on view
-        if (renderingView.isClickable() || renderingView.isCheckable()) {
-            uiActions.add(UIAction.CLICK);
-        }
-    }
-
-
-    public void updateSemanticActions(UIScreen uiScreen) {
-        for (UIAction uiAction: uiActions) {
-            if (semanticActions.get(uiAction.id()) == null) {
-                SemanticAction semanticAction = SemanticAction.create(uiScreen, this, uiAction);
-                if (!SemanticAction.isUndefined(semanticAction)) {
-                    semanticActions.put(uiAction.id(), semanticAction);
-                    SemanticActionStore.getInstance().addSemanticAction(semanticAction);
-                    Utils.printDebug("Adding semantic action: " + semanticAction);
-                }
-            }
-        }
-    }
+//    public void updateSemanticActions(UIScreen uiScreen) {
+//        for (UIAction uiAction: uiActions) {
+//            if (semanticActions.get(uiAction.getId()) == null) {
+//                SemanticAction semanticAction = SemanticAction.create(uiScreen, this, uiAction);
+//                if (!SemanticAction.isUndefined(semanticAction)) {
+//                    semanticActions.put(uiAction.getId(), semanticAction);
+//                    SemanticActionStore.getInstance().addSemanticAction(semanticAction);
+//                    Utils.printDebug("Adding semantic action: " + semanticAction);
+//                }
+//            }
+//        }
+//    }
 
     public void addChildren(UIElement uiElement) {
         this.childElements.add(uiElement);
-        if (ViewUtils.isToggleable(uiElement.getClassName())) {
+        if (uiElement.isToggleable()) {
             numToggleableChildren++;
         }
         numToggleableChildren += uiElement.getNumToggleableChildren();
@@ -103,6 +105,10 @@ public class UIElement {
 
     public void add(NavigationalAction navigationalAction) {
         this.navigationalActions.add(navigationalAction);
+    }
+
+    public void add(String uiActionId, SemanticAction semanticAction) {
+            semanticActions.put(uiActionId, semanticAction);
     }
 
     public String getClassName() {
@@ -179,26 +185,6 @@ public class UIElement {
         return result;
     }
 
-    //Helper methods
-    public boolean isTextView() {
-        return ViewUtils.TEXT_VIEW_CLASS_NAME.equals(className);
-    }
-
-    public boolean isImage() {
-        return ViewUtils.IMAGE_BUTTON_CLASS_NAME.equals(className);
-    }
-
-    public boolean isLinearRelativeOrFrameLayout() {
-        return ViewUtils.LINEAR_LAYOUT_CLASS_NAME.equals(className) || ViewUtils.RELATIVE_LAYOUT_CLASS_NAME.equals(className) ||
-                ViewUtils.FRAME_LAYOUT_CLASS_NAME.equals(className);
-    }
-
-    public boolean isCheckBox() {
-        return ViewUtils.CHECK_BOX_CLASS_NAME.equals(className);
-    }
-
-
-
     public String getChildText() {
         StringBuilder childTextBuilder = new StringBuilder();
         if (childElements != null && !childElements.isEmpty()) {
@@ -232,7 +218,7 @@ public class UIElement {
     @Override
     public String toString() {
         return "UIElement{" +
-                "id='" + id() + '\'' +
+                "getId='" + id() + '\'' +
                 ", className='" + className + '\'' +
                 ", packageName='" + packageName + '\'' +
                 ", primaryText='" + primaryText + '\'' +

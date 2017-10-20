@@ -1,7 +1,6 @@
 package graph;
 
 
-import models.SemanticActionType;
 import models.UIPath;
 import models.UIScreen;
 import scala.Int;

@@ -1,7 +1,7 @@
 package util;
 
 import models.*;
-import scala.util.matching.Regex;
+import storage.SemanticActionStore;
 import storage.UIScreenStore;
 import views.CrawlingInput;
 import views.RenderingView;
@@ -66,7 +66,8 @@ public class CrawlingInputParser {
 
         //Set semantic actions here -- we should only add for stuff that doesn't have navigational action
         for (UIElement uiElement: allActionableElementsList) {
-            uiElement.updateSemanticActions(screenToBeCreated);
+            updateSemanticActions(screenToBeCreated, uiElement);
+            //uiElement.updateSemanticActions(screenToBeCreated);
         }
 
         //Create UIScreen / UIElement / UIAction from last stuff
@@ -182,7 +183,7 @@ public class CrawlingInputParser {
 
         if (lastElement == null) {
             //uiElement not found in the screen, create it and assign to the screen
-            lastElement = new UIElement(lastViewClicked);
+            lastElement = createUIElementFromRenderingView(lastViewClicked);
             lastScreen.add(lastElement);
             //update the lastScreen in the screenStore
             UIScreenStore.getInstance().updateScreen(lastScreen);
@@ -193,12 +194,36 @@ public class CrawlingInputParser {
     }
 
     public static UIElement createUIElementFromRenderingView(RenderingView renderingView) {
-        UIElement uiElement = new UIElement(renderingView.getClassName(),
-                renderingView.getPackageName(), renderingView.getOverallText());
+        String primaryText = renderingView.getOverallText();
+        String className = renderingView.getClassName();
+        String packageName = renderingView.getPackageName();
+        String textBasedOnClassName = ViewUtils.getTextBasedOnClass(className, primaryText);
+        UIElement uiElement = new UIElement(
+                className,
+                packageName,
+                textBasedOnClassName,
+                ViewUtils.isToggleable(className));
         //Add UIActions based on view
         if (renderingView.isClickable() || renderingView.isCheckable()) {
             uiElement.add(UIAction.CLICK);
         }
         return uiElement;
+    }
+
+    private static void updateSemanticActions(UIScreen uiScreen, UIElement uiElement) {
+        if (uiScreen == null || uiElement == null) {
+            return;
+        }
+        HashMap<String, SemanticAction> semanticActionHashMap = uiElement.getSemanticActions();
+        for (UIAction uiAction: uiElement.getUiActions()) {
+            if (semanticActionHashMap.get(uiAction.id()) == null) {
+                SemanticAction semanticAction = SemanticAction.create(uiScreen, uiElement, uiAction);
+                if (!SemanticAction.isUndefined(semanticAction)) {
+                    semanticActionHashMap.put(uiAction.id(), semanticAction);
+                    SemanticActionStore.getInstance().addSemanticAction(semanticAction);
+                    Utils.printDebug("Adding semantic action: " + semanticAction);
+                }
+            }
+        }
     }
 }

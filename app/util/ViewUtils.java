@@ -3,6 +3,7 @@ package util;
 import views.RenderingView;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ViewUtils {
     public static final String TEXT_VIEW_CLASS_NAME = "android.widget.TextView";
@@ -144,6 +145,26 @@ public class ViewUtils {
                 className.equalsIgnoreCase(CHECK_BOX_CLASS_NAME) ||
                 className.equalsIgnoreCase(CHECKED_TEXT_VIEW_CLASS_NAME);
     }
+
+    public static String getTitleFromView(HashMap<Long, RenderingView> renderingViewHashMap) {
+        long topTextViewId = 0;
+        long topTextViewYCoordinate = Long.MAX_VALUE;
+        long topTextViewXCoordinate = Long.MAX_VALUE;
+        String titleToReturn = Utils.EMPTY_STRING;
+        for (Map.Entry<Long, RenderingView> entry : renderingViewHashMap.entrySet()) {
+            RenderingView renderingView = entry.getValue();
+            if (ViewUtils.isTextView(renderingView) &&
+                    renderingView.getTopY() < topTextViewYCoordinate ||
+                    (renderingView.getTopY() == topTextViewYCoordinate && renderingView.getLeftX() < topTextViewXCoordinate)) {
+                topTextViewYCoordinate = renderingView.getTopY();
+                topTextViewXCoordinate = renderingView.getLeftX();
+                topTextViewId = renderingView.getFlatViewId();
+                titleToReturn = renderingView.getText();
+            }
+        }
+        return titleToReturn;
+    }
+
 
 }
 

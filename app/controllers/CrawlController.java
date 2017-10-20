@@ -23,7 +23,6 @@ public class CrawlController extends Controller {
         }
         CrawlingInput crawlingInput = Json.fromJson(json, CrawlingInput.class);
         UIScreen screen = CrawlingInputParser.parseCrawlingInput(crawlingInput);
-        //UIScreen screen = new UIScreen(crawlingInput);
         UIScreen createdScreen = UIScreenStore.getInstance().addScreen(screen);
         JsonNode jsonObject = Json.toJson(createdScreen);
         return created(Utils.createResponse(jsonObject, true));
@@ -35,7 +34,7 @@ public class CrawlController extends Controller {
             return badRequest(Utils.createResponse("Expecting Json data", false));
         }
         CrawlingInput crawlingInput = Json.fromJson(json, CrawlingInput.class);
-        UIScreen screen = new UIScreen(crawlingInput);
+        UIScreen screen = CrawlingInputParser.parseCrawlingInput(crawlingInput);
         UIScreen updatedScreen = UIScreenStore.getInstance().updateScreen(screen);
         if (updatedScreen == null) {
             return notFound(Utils.createResponse("Screen not found", false));
@@ -63,6 +62,6 @@ public class CrawlController extends Controller {
         if (!UIScreenStore.getInstance().deleteScreen(UIScreen.getScreenId(packageName, title, deviceInfo))) {
             return notFound(Utils.createResponse("Screen with title:" + title + " not found", false));
         }
-        return ok(Utils.createResponse("Screen with id:" + title + " deleted", true));
+        return ok(Utils.createResponse("Screen with getId:" + title + " deleted", true));
     }
 }
