@@ -37,7 +37,8 @@ public class ActionController extends Controller {
                 SETTINGS_TITLE, deviceInfo, new SimplePathFinder());
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonData = mapper.convertValue(actionResponse, JsonNode.class);
-        return ok(Utils.createResponse(jsonData, true));
+        return ok(jsonData);
+        //return ok(Utils.createResponse(jsonData, true));
     }
 
 

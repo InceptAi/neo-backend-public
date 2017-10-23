@@ -31,6 +31,8 @@ public class ViewUtils {
     public static String CHECK_BOX_TEXT = "CHECK_BOX_ON_OFF";
     public static String SEEK_BAR_TEXT = "SEEK_BAR_VALUE";
     public static String EDIT_TEXT_VIEW_TEXT = "EDIT_TEXT_VIEW_TEXT";
+    public static final String MULTIPLE_WORD_MATCH_DELIMITER = "#";
+    public static final String ON_OFF_KEYWORD_REPLACEMENT = ON_TEXT + MULTIPLE_WORD_MATCH_DELIMITER + OFF_TEXT;
 
     public static final HashMap<String , String> ON_MAP = new HashMap<String , String>() {{
         put(ViewUtils.SWITCH_TEXT,    "on");

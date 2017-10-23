@@ -35,6 +35,13 @@ public class SemanticActionStore {
         return semanticActionMap.remove(id) != null;
     }
 
+    public HashMap<String, String> returnAllActions() {
+        HashMap<String, String> hashMapToReturn = new HashMap<>();
+        for (SemanticAction semanticAction : semanticActionMap.values()) {
+            hashMapToReturn.put(semanticAction.getId(), semanticAction.getSemanticActionDescription());
+        }
+        return hashMapToReturn;
+    }
 
     public HashMap<String, String> searchActions(String inputText, String deviceInfo,
                                                  TextInterpreter textInterpreter, int maxResults) {
@@ -42,7 +49,6 @@ public class SemanticActionStore {
         HashMap<String, String> semanticActionIdToBestMatchingString = new HashMap<>();
         double minMetricInserted = -1;
         String minIdInserted = Utils.EMPTY_STRING;
-
         for (SemanticAction semanticAction: semanticActionMap.values()) {
             if (!Utils.nullOrEmpty(deviceInfo) && !semanticAction.getDeviceInfo().equalsIgnoreCase(deviceInfo)) {
                 //Match the device info here

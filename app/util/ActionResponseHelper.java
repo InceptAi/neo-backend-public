@@ -16,6 +16,12 @@ public class ActionResponseHelper {
     //Take input the semantic ids and best matching string and create action response
     public static ActionResponse createActionResponse(String inputText, String packageName, String baseScreenTitle,
                                                       String deviceInfo, PathFinder pathFinder) {
+        //sanitize the input
+        inputText = Utils.sanitizeText(inputText);
+        deviceInfo = Utils.sanitizeText(deviceInfo);
+        baseScreenTitle = Utils.sanitizeText(baseScreenTitle);
+
+        //Make sure starting screen is not null
         UIScreen startingScreen = UIScreenStore.getInstance().getScreen(packageName, baseScreenTitle, deviceInfo);
         if (startingScreen == null) {
             return new ActionResponse();
@@ -23,8 +29,14 @@ public class ActionResponseHelper {
         List<ActionDetails> actionDetailsList = new ArrayList<>();
         //find top actions first
         final int MAX_RESULTS = 1;
-        HashMap<String, String> topMatchingActions = SemanticActionStore.getInstance().searchActions(inputText,
-                deviceInfo, new SimpleTextInterpreter(), MAX_RESULTS);
+        HashMap<String, String> topMatchingActions = new HashMap<>();
+        if (Utils.nullOrEmpty(deviceInfo) && Utils.nullOrEmpty(inputText)) {
+            //return all semantic actions
+            topMatchingActions = SemanticActionStore.getInstance().returnAllActions();
+        } else {
+            topMatchingActions = SemanticActionStore.getInstance().searchActions(inputText,
+                    deviceInfo, new SimpleTextInterpreter(), MAX_RESULTS);
+        }
         for (HashMap.Entry<String, String> entry : topMatchingActions.entrySet()) {
             String actionId = entry.getKey();
             String description = entry.getValue();
@@ -40,8 +52,10 @@ public class ActionResponseHelper {
             List<NavigationIdentifier> navigationIdentifierList = getNavigationPathForClient(navigationPathBetweenScreens);
             //Last step
             ScreenIdentifier dstScreenIdentifier = new ScreenIdentifier(dstScreen.getTitle(), dstScreen.getPackageName());
-            ElementIdentifier elementIdentifier = createElementIdentifier(uiElement.getClassName(), uiElement.getPackageName(),
-                    uiElement.getPrimaryText(), uiElement.getChildText()); //
+            ElementIdentifier elementIdentifier = createElementIdentifier(
+                    uiElement.getClassName(),
+                    uiElement.getPackageName(),
+                    uiElement.getAllText()); //
 
             ActionIdentifier actionIdentifier = new ActionIdentifier(dstScreenIdentifier, elementIdentifier, description,
                     semanticAction.getSemanticActionName());
@@ -67,8 +81,10 @@ public class ActionResponseHelper {
             }
             ScreenIdentifier srcIdentifier = new ScreenIdentifier(srcScreen.getTitle(), srcScreen.getPackageName());
             ScreenIdentifier dstIdentifier = new ScreenIdentifier(dstScreen.getTitle(), dstScreen.getPackageName());
-            ElementIdentifier elementIdentifier = createElementIdentifier(uiElement.getClassName(), uiElement.getPackageName(),
-                    uiElement.getPrimaryText(), uiElement.getChildText()); //
+            ElementIdentifier elementIdentifier = createElementIdentifier(
+                    uiElement.getClassName(),
+                    uiElement.getPackageName(),
+                    uiElement.getAllText()); //
             NavigationIdentifier navigationIdentifier = new NavigationIdentifier(srcIdentifier, dstIdentifier,
                     elementIdentifier, uiStep.getUiActionId());
             navigationIdentifierList.add(navigationIdentifier);
@@ -76,11 +92,8 @@ public class ActionResponseHelper {
         return navigationIdentifierList;
     }
 
-    public static ElementIdentifier createElementIdentifier(String className, String packageName,
-                                                            String primaryText, String childText) {
-        List<String> primaryTextList = Utils.replaceSwitchTemplateWordsWithPotentialOptions(primaryText);
-        List<String> childTextList = Utils.replaceSwitchTemplateWordsWithPotentialOptions(childText);
-        return new ElementIdentifier(className, packageName, primaryTextList, childTextList);
+    public static ElementIdentifier createElementIdentifier(String className, String packageName, String elementText) {
+        return new ElementIdentifier(className, packageName, Utils.generateKeywordsForFindingElement(elementText));
     }
 
 

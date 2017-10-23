@@ -9,6 +9,7 @@ import java.util.*;
 public class Utils {
     public static String EMPTY_STRING = "";
     public static String PRINT_MODE = "DEBUG";
+
     public static ObjectNode createResponse(Object response, boolean ok) {
         ObjectNode result = Json.newObject();
         result.put("isSuccessfull", ok);
@@ -18,6 +19,17 @@ public class Utils {
 
         return result;
     }
+
+    public static ObjectNode createSimpleResponse(Object response, boolean ok) {
+        ObjectNode result = Json.newObject();
+        result.put("isSuccessfull", ok);
+        if (response instanceof String)
+            result.put("body", (String) response);
+        else result.set("body", (JsonNode) response);
+
+        return result;
+    }
+
 
     public static boolean nullOrEmpty(String target) {
         return target == null || target.isEmpty() || target.equals("null");
@@ -75,17 +87,38 @@ public class Utils {
         return replacedSentenceBuilder.toString().trim().toLowerCase();
     }
 
-    public static List<String> replaceSwitchTemplateWordsWithPotentialOptions(String inputText) {
+    //
+//    public static List<String> generateKeywordsForFindingElement(String inputText) {
+//        if (nullOrEmpty(inputText)) {
+//            return new ArrayList<>();
+//        }
+//        List<String> list = new ArrayList<>();
+//        //TODO: We should send down regex for matching text
+//        list.add(replaceWord(inputText, ViewUtils.getMapForOnOffTemplateReplacement("on")));
+//        list.add(replaceWord(inputText, ViewUtils.getMapForOnOffTemplateReplacement("off")));
+//        //TODO: handle check box, seek bar and other stuff
+//        //TODO: remove duplicates from the final string -- make sure each element in the list has no duplicates
+//        return list;
+//    }
+
+    public static List<String> generateKeywordsForFindingElement(String inputText) {
         if (nullOrEmpty(inputText)) {
             return new ArrayList<>();
         }
-        List<String> list = new ArrayList<>();
-        //TODO: We should send down regex for matching text
-        list.add(replaceWord(inputText, ViewUtils.getMapForOnOffTemplateReplacement("on")));
-        list.add(replaceWord(inputText, ViewUtils.getMapForOnOffTemplateReplacement("off")));
-        //TODO: handle check box, seek bar and other stuff
-        //TODO: remove duplicates from the final string -- make sure each element in the list has no duplicates
-        return list;
+//        inputText = inputText.replaceAll(ViewUtils.SWITCH_TEXT, "ON#OFF");
+//        inputText = inputText.replaceAll(ViewUtils.ON_OFF_TEXT, "ON#OFF");
+        //Remove duplicates
+        Set<String> keywordListToReturn = new HashSet<>();
+        List<String> inputWords = Arrays.asList(inputText.split(" "));
+        for (String word: inputWords) {
+            if (word.equals(ViewUtils.SWITCH_TEXT) || word.equals(ViewUtils.ON_OFF_TEXT)) {
+                word = ViewUtils.ON_OFF_KEYWORD_REPLACEMENT;
+            }
+            if (!keywordListToReturn.contains(word)) {
+                keywordListToReturn.add(word);
+            }
+        }
+        return new ArrayList<>(keywordListToReturn);
     }
 
     public static String removeDuplicateWords(String input) {

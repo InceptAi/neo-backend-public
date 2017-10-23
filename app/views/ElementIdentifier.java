@@ -1,28 +1,16 @@
 package views;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ElementIdentifier {
     private String className;
     private String packageName;
-    private List<String> primaryTextList;
-    private List<String> childTextList;
+    private List<String> keywordList;
 
-    public ElementIdentifier(String className, String packageName, String primaryText, String childText) {
+    public ElementIdentifier(String className, String packageName, List<String> keywordList) {
         this.className = className;
         this.packageName = packageName;
-        this.primaryTextList = new ArrayList<>();
-        this.childTextList = new ArrayList<>();
-        this.primaryTextList.add(primaryText);
-        this.childTextList.add(childText);
-    }
-
-    public ElementIdentifier(String className, String packageName, List<String> primaryTextList, List<String> childTextList) {
-        this.className = className;
-        this.packageName = packageName;
-        this.primaryTextList = primaryTextList;
-        this.childTextList = childTextList;
+        this.keywordList = keywordList;
     }
 
     public String getClassName() {
@@ -41,19 +29,11 @@ public class ElementIdentifier {
         this.packageName = packageName;
     }
 
-    public List<String> getPrimaryTextList() {
-        return primaryTextList;
+    public List<String> getKeywordList() {
+        return keywordList;
     }
 
-    public void setPrimaryTextList(List<String> primaryTextList) {
-        this.primaryTextList = primaryTextList;
-    }
-
-    public List<String> getChildTextList() {
-        return childTextList;
-    }
-
-    public void setChildTextList(List<String> childTextList) {
-        this.childTextList = childTextList;
+    public void setKeywordList(List<String> keywordList) {
+        this.keywordList = keywordList;
     }
 }
