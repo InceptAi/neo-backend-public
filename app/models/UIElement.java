@@ -181,7 +181,11 @@ public class UIElement {
         int result = className.hashCode();
         result = 31 * result + packageName.hashCode();
         result = 31 * result + primaryText.hashCode();
-        result = 31 * result + (childElements != null ? childElements.hashCode() : 0);
+        int childHashCode = 0;
+        for (UIElement childElement: childElements) {
+            childHashCode = childHashCode + childElement.hashCode();
+        }
+        result = 31 * result + childHashCode;
         return result;
     }
 

@@ -16,6 +16,7 @@ import java.util.Set;
 public class ActionController extends Controller {
     public static final String SETTINGS_TITLE = "Settings";
     public static final String SETTINGS_PACKAGE_NAME = "com.android.settings";
+    private static final int DEFAULT_MAX_RESULTS_FOR_ACTION_SEARCH = 10;
 
     public Result listActions() {
         Set<SemanticAction> result = SemanticActionStore.getInstance().getAllActions();
@@ -26,7 +27,7 @@ public class ActionController extends Controller {
 
     public Result searchActions(String inputText, String packageName, String baseScreenTitle, String deviceInfo) {
         ActionResponse actionResponse = ActionResponseHelper.createActionResponse(inputText, packageName,
-                baseScreenTitle, deviceInfo, new SimplePathFinder());
+                baseScreenTitle, deviceInfo, new SimplePathFinder(), DEFAULT_MAX_RESULTS_FOR_ACTION_SEARCH);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonData = mapper.convertValue(actionResponse, JsonNode.class);
         return ok(Utils.createResponse(jsonData, true));
@@ -34,7 +35,7 @@ public class ActionController extends Controller {
 
     public Result searchSettingActions(String inputText, String deviceInfo) {
         ActionResponse actionResponse = ActionResponseHelper.createActionResponse(inputText, SETTINGS_PACKAGE_NAME,
-                SETTINGS_TITLE, deviceInfo, new SimplePathFinder());
+                SETTINGS_TITLE, deviceInfo, new SimplePathFinder(), DEFAULT_MAX_RESULTS_FOR_ACTION_SEARCH);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonData = mapper.convertValue(actionResponse, JsonNode.class);
         return ok(jsonData);

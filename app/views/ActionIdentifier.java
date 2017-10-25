@@ -5,15 +5,26 @@ public class ActionIdentifier {
     private ElementIdentifier elementIdentifier;
     private String actionDescription;
     private String actionToTake;
+    private double confidenceScore;
 
     public ActionIdentifier(ScreenIdentifier screenIdentifier,
                             ElementIdentifier elementIdentifier,
                             String actionDescription,
-                            String actionToTake) {
+                            String actionToTake,
+                            double confidenceScore) {
         this.screenIdentifier = screenIdentifier;
         this.elementIdentifier = elementIdentifier;
         this.actionDescription = actionDescription;
         this.actionToTake = actionToTake;
+        this.confidenceScore = confidenceScore;
+    }
+
+    public double getConfidenceScore() {
+        return confidenceScore;
+    }
+
+    public void setConfidenceScore(double confidenceScore) {
+        this.confidenceScore = confidenceScore;
     }
 
     public ScreenIdentifier getScreenIdentifier() {

@@ -7,6 +7,7 @@ public class UIStep {
     public enum UIStepType {
         TO_ANOTHER_SCREEN("INTER_SCREEN"),
         WITHIN_SAME_SCREEN("WITHIN_SAME_SCREEN"),
+        SOFT_STEP_INTER_SCREEN("SOFT_STEP_INTER_SCREEN"),
         UNDEFINED("UNDEFINED");
 
         private String id;
@@ -96,6 +97,8 @@ public class UIStep {
     public boolean isWithinSameScreen() {
         return uiStepTypeId.equalsIgnoreCase(UIStepType.WITHIN_SAME_SCREEN.id());
     }
+
+    public boolean isSoftStep() { return uiStepTypeId.equalsIgnoreCase(UIStepType.SOFT_STEP_INTER_SCREEN.id()); }
 
     @Override
     public String toString() {

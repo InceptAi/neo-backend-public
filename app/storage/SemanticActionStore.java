@@ -35,19 +35,21 @@ public class SemanticActionStore {
         return semanticActionMap.remove(id) != null;
     }
 
-    public HashMap<String, String> returnAllActions() {
-        HashMap<String, String> hashMapToReturn = new HashMap<>();
+    public HashMap<String, SemanticActionMatchingTextAndScore> returnAllActions() {
+        HashMap<String, SemanticActionMatchingTextAndScore> hashMapToReturn = new HashMap<>();
         for (SemanticAction semanticAction : semanticActionMap.values()) {
-            hashMapToReturn.put(semanticAction.getId(), semanticAction.getSemanticActionDescription());
+            hashMapToReturn.put(
+                    semanticAction.getId(),
+                    new SemanticActionMatchingTextAndScore(semanticAction.getSemanticActionDescription(), 0));
         }
         return hashMapToReturn;
     }
 
-    public HashMap<String, String> searchActions(String inputText, String deviceInfo,
+    public HashMap<String, SemanticActionMatchingTextAndScore> searchActions(String inputText, String deviceInfo,
                                                  TextInterpreter textInterpreter, int maxResults) {
         HashMap<String, Double> semanticActionIdToMatchMetric = new HashMap<>();
         HashMap<String, String> semanticActionIdToBestMatchingString = new HashMap<>();
-        double minMetricInserted = -1;
+        double minMetricInserted = Double.MAX_VALUE;
         String minIdInserted = Utils.EMPTY_STRING;
         for (SemanticAction semanticAction: semanticActionMap.values()) {
             if (!Utils.nullOrEmpty(deviceInfo) && !semanticAction.getDeviceInfo().equalsIgnoreCase(deviceInfo)) {
@@ -65,29 +67,51 @@ public class SemanticActionStore {
                 }
             }
             if (bestMatchMetric > 0) {
-                if (semanticActionIdToMatchMetric.size() >= maxResults && bestMatchMetric > minMetricInserted) {
-                    semanticActionIdToMatchMetric.remove(minIdInserted);
-                    semanticActionIdToBestMatchingString.remove(minIdInserted);
-                }
-                if (semanticActionIdToMatchMetric.size() < maxResults) {
-                    semanticActionIdToBestMatchingString.put(semanticAction.getId(), bestMatchingString);
-                    semanticActionIdToMatchMetric.put(semanticAction.getId(), bestMatchMetric);
-                    if (bestMatchMetric < minMetricInserted) {
-                        minMetricInserted = bestMatchMetric;
-                        minIdInserted = semanticAction.getId();
-                    }
-                }
+                semanticActionIdToBestMatchingString.put(semanticAction.getId(), bestMatchingString);
+                semanticActionIdToMatchMetric.put(semanticAction.getId(), bestMatchMetric);
             }
         }
 
         //Sort the hash maps and return
-        HashMap<String, String> sortedSemanticActionIdToDescription = new HashMap<>();
+        LinkedHashMap<String, SemanticActionMatchingTextAndScore> sortedSemanticActionIdToDescriptionAndScore = new LinkedHashMap<>();
         Map<String, Double> sortedMetricMap = Utils.sortHashMapByValueDescending(semanticActionIdToMatchMetric);
+        int numActions = 0;
         for (HashMap.Entry<String, Double> entry : sortedMetricMap.entrySet()) {
+            if (numActions >= maxResults) {
+                break;
+            }
             String bestMatchingStringForId = semanticActionIdToBestMatchingString.get(entry.getKey());
-            sortedSemanticActionIdToDescription.put(entry.getKey(), bestMatchingStringForId);
+            sortedSemanticActionIdToDescriptionAndScore.put(
+                    entry.getKey(),
+                    new SemanticActionMatchingTextAndScore(bestMatchingStringForId, entry.getValue()));
+            numActions++;
         }
-        return sortedSemanticActionIdToDescription;
+        return sortedSemanticActionIdToDescriptionAndScore;
+    }
+
+    public class SemanticActionMatchingTextAndScore {
+        String matchingDescription;
+        double confidenceScore;
+        SemanticActionMatchingTextAndScore(String matchingDescription, double confidenceScore) {
+            this.matchingDescription = matchingDescription;
+            this.confidenceScore = confidenceScore;
+        }
+
+        public String getMatchingDescription() {
+            return matchingDescription;
+        }
+
+        public void setMatchingDescription(String matchingDescription) {
+            this.matchingDescription = matchingDescription;
+        }
+
+        public double getConfidenceScore() {
+            return confidenceScore;
+        }
+
+        public void setConfidenceScore(double confidenceScore) {
+            this.confidenceScore = confidenceScore;
+        }
     }
 
 }

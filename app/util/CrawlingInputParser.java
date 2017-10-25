@@ -6,10 +6,7 @@ import storage.UIScreenStore;
 import views.CrawlingInput;
 import views.RenderingView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CrawlingInputParser {
 
@@ -17,20 +14,42 @@ public class CrawlingInputParser {
         UIScreen screenToBeCreated = new UIScreen();
         if (crawlingInput.getRootTitle() != null) {
             screenToBeCreated.setTitle(crawlingInput.getRootTitle());
+            Utils.printDebug("In parseCrawlingInput currentTitle: " + crawlingInput.getRootTitle());
         }
         if (crawlingInput.getRootPackageName() != null) {
             screenToBeCreated.setPackageName(crawlingInput.getRootPackageName());
+            Utils.printDebug("In parseCrawlingInput currentPkg: " + crawlingInput.getRootPackageName());
         }
         if (crawlingInput.getDeviceInfo() != null) {
             screenToBeCreated.setDeviceInfo(crawlingInput.getDeviceInfo());
         }
 
+        if (crawlingInput.getLastScreenTitle() != null &&
+                crawlingInput.getLastScreenPackageName() != null &&
+                crawlingInput.getLastUIAction() != null &&
+                crawlingInput.getLastViewClicked() != null ) {
+            String lastClickedText = crawlingInput.getLastViewClicked().getText() != null ?
+                    crawlingInput.getLastViewClicked().getText() : Utils.EMPTY_STRING;
+            Utils.printDebug("In parseCrawlingInput lastScreenTitle: " +
+                    crawlingInput.getLastScreenTitle() + " lastpkg: " +
+                    crawlingInput.getLastScreenPackageName() + " lastAction: " +
+                    crawlingInput.getLastUIAction() + " lastViewText: " +
+                    lastClickedText);
+
+        }
+
+
         String currentScreenId = screenToBeCreated.getId();
 
+        List<Long> sortedViewIds= new ArrayList<>(crawlingInput.getViewMap().keySet());
+        Collections.sort(sortedViewIds);
+
         HashMap<Long, UIElement> viewIdToUIElementMap = new HashMap<>();
-        for (Map.Entry<Long, RenderingView> entry : crawlingInput.getViewMap().entrySet()) {
-            RenderingView renderingView = entry.getValue();
+        for (Long viewId: sortedViewIds) {
+        //for (Map.Entry<Long, RenderingView> entry : crawlingInput.getViewMap().entrySet()) {
+            //RenderingView renderingView = entry.getValue();
             //Create a UI element from the view -- no child text / no semantic / or navigational stuff for now
+            RenderingView renderingView = crawlingInput.getViewMap().get(viewId);
             UIElement uiElement = createUIElementFromRenderingView(renderingView);
             viewIdToUIElementMap.put(renderingView.getFlatViewId(), uiElement);
         }
@@ -38,8 +57,10 @@ public class CrawlingInputParser {
         //Second pass to assign created elements
         List<UIElement> topLevelElementList = new ArrayList<>();
         List<UIElement> allActionableElementsList = new ArrayList<>();
-        for (Map.Entry<Long, RenderingView> entry : crawlingInput.getViewMap().entrySet()) {
-            RenderingView renderingView = entry.getValue();
+        for (Long viewId: sortedViewIds) {
+            RenderingView renderingView = crawlingInput.getViewMap().get(viewId);
+//            for (Map.Entry<Long, RenderingView> entry : crawlingInput.getViewMap().entrySet()) {
+//            RenderingView renderingView = entry.getValue();
             if (renderingView.isParentOfClickableView() &&
                     !renderingView.isClickable() &&
                     renderingView.getOverallText().equals(Utils.EMPTY_STRING)) {
@@ -86,7 +107,7 @@ public class CrawlingInputParser {
             if (!Utils.nullOrEmpty(lastScreenId)) {
                 UIScreen lastScreen = UIScreenStore.getInstance().getScreen(lastScreenId);
                 if (lastScreen != null) {
-                    if (uiStep.isInterScreenStep()) {
+                    if (uiStep.isInterScreenStep() || uiStep.isSoftStep()) { //navigational step
                         Utils.printDebug("Navigational UI Step");
                         List<UIPath> lastScreenUiPaths = lastScreen.getUiPaths();
                         Utils.printDebug("Last screen paths: " + lastScreenUiPaths.toString());
@@ -118,11 +139,11 @@ public class CrawlingInputParser {
         return screenToBeCreated;
     }
 
-    public static UIStep getLastUIStep(UIScreen currentScreen,
-                                 String lastScreenTitle,
-                                 String lastScreenPackageName,
-                                 RenderingView lastViewClicked,
-                                 String lastAction) {
+    private static UIStep getLastUIStep(UIScreen currentScreen,
+                                       String lastScreenTitle,
+                                       String lastScreenPackageName,
+                                       RenderingView lastViewClicked,
+                                       String lastAction) {
         //Create the last step in UIPath
         //Add navigational action to the last UI Element
         UIStep undefinedUIStep = new UIStep();
@@ -131,15 +152,25 @@ public class CrawlingInputParser {
         }
 
         if (Utils.nullOrEmpty(lastScreenPackageName) || Utils.nullOrEmpty(lastViewClicked.getPackageName())) {
+            Utils.printDebug("Error in getLastUIStep: empty lastPkg: or lastViewClickedPkg");
             return undefinedUIStep;
         }
 
-        //This is not valid
+        //If there is no text in the clicked view, we can't tell anything so its pointless
+        //TODO: We should only take into account TYPE_VIEW_CLICKED events ?
+//        if (Utils.nullOrEmpty(lastViewClicked.getOverallText())) {
+//            Utils.printDebug("Error In getLastUIStep: empty text for lastViewClicked");
+//            return undefinedUIStep;
+//        }
+
+        //This is not valid since cell settings have a different package name
         //TODO -- commenting this -- see if it works.
 //        if (!lastScreenPackageName.toLowerCase().equals(lastViewClicked.getPackageName().toLowerCase())) {
 //            return undefinedUIStep;
 //        }
 
+
+        //Check if the text of lastViewClicked matches with
         UIScreen lastScreen =  null;
         UIElement lastElement = null;
         UIAction lastUIAction = UIAction.actionStringToEnum(lastAction);
@@ -149,30 +180,34 @@ public class CrawlingInputParser {
 
         if (!Utils.nullOrEmpty(lastScreenTitle) && !Utils.nullOrEmpty(lastScreenPackageName)) {
             lastScreenId = UIScreen.getScreenId(lastScreenPackageName, lastScreenTitle, currentScreen.getDeviceInfo().toString());
+            lastScreen = UIScreenStore.getInstance().getScreen(lastScreenId);
         }
 
-
-        if (Utils.nullOrEmpty(lastScreenId)) {
-            //We don't know about the last screen
+        if (lastScreen == null) { // handle this case later
+            Utils.printDebug("Error In getLastUIStep: lastScreenId not found with title/pkg " + lastScreenTitle + " / " + lastScreenPackageName);
             return undefinedUIStep;
         }
+
 
         if (lastScreenId.equalsIgnoreCase(currentScreen.getId())) {
             uiStepType = UIStep.UIStepType.WITHIN_SAME_SCREEN;
         } else {
-            uiStepType = UIStep.UIStepType.TO_ANOTHER_SCREEN;
+            if (Utils.nullOrEmpty(lastViewClicked.getOverallText())) {
+                uiStepType = UIStep.UIStepType.SOFT_STEP_INTER_SCREEN;
+            } else {
+                uiStepType = UIStep.UIStepType.TO_ANOTHER_SCREEN;
+            }
         }
 
-        lastScreen = UIScreenStore.getInstance().getScreen(lastScreenId);
+        boolean isSoftLink = uiStepType.equals(UIStep.UIStepType.SOFT_STEP_INTER_SCREEN);
+        String textForMatchingElement = isSoftLink ? currentScreen.getTitle() : lastViewClicked.getOverallText();
 
-        if (lastScreen == null) { // handle this case later
-            return undefinedUIStep;
-        }
-
-        List <UIElement> matchingElements =  lastScreen.findElementsInScreen(
+        //TODO: Replaced getText with getOverallText to include contentDescription -- see if it works
+        List <UIElement> matchingElements = lastScreen.findElementsInScreen(
                 lastViewClicked.getClassName(),
                 lastViewClicked.getPackageName(),
-                lastViewClicked.getText());
+                textForMatchingElement,
+                isSoftLink);
 
         //If more than one, take the top one for now
         // TODO sort the elements based on level of text matching --
@@ -181,12 +216,21 @@ public class CrawlingInputParser {
             lastElement = matchingElements.get(0);
         }
 
+//        if (lastElement == null) {
+//            if (isSoftLink || Utils.nullOrEmpty(lastViewClicked.getOverallText())) {
+//                //Softlink and couldn't find this element in the last screen,
+//                //or last view clicked has not meaningful text to create an element, so bail here
+//                return undefinedUIStep;
+//            }
+//            //Create a new element
+//            lastElement = createUIElementFromRenderingView(lastViewClicked);
+//            lastScreen.add(lastElement);
+//            //update the lastScreen in the screenStore
+//            UIScreenStore.getInstance().updateScreen(lastScreen);
+//        }
+
         if (lastElement == null) {
-            //uiElement not found in the screen, create it and assign to the screen
-            lastElement = createUIElementFromRenderingView(lastViewClicked);
-            lastScreen.add(lastElement);
-            //update the lastScreen in the screenStore
-            UIScreenStore.getInstance().updateScreen(lastScreen);
+            return undefinedUIStep;
         }
 
         //Create a UI Step and add to the path

@@ -2,18 +2,23 @@ package util;
 
 import models.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MergeUtils {
 
     public static List<UIPath> mergeUIPaths(List<UIPath> uiPathListOld, List<UIPath> uiPathListUpdated) {
-        List<UIPath> newUIPathList = new ArrayList<>();
-        newUIPathList.addAll(uiPathListOld);
-        newUIPathList.addAll(uiPathListUpdated);
-        return newUIPathList;
+        HashMap<String, UIPath> uiPathMapOld = new HashMap<>();
+        HashMap<String, UIPath> uiPathMapUpdated = new HashMap<>();
+        for (UIPath uiPath: uiPathListOld) {
+            uiPathMapOld.put(uiPath.getId(), uiPath);
+        }
+        for (UIPath uiPath: uiPathListUpdated) {
+            uiPathMapUpdated.put(uiPath.getId(), uiPath);
+        }
+        HashMap<String, UIPath> mergedMap = new HashMap<>();
+        mergedMap.putAll(uiPathMapOld);
+        mergedMap.putAll(uiPathMapUpdated);
+        return new ArrayList<>(mergedMap.values());
     }
 
     public static HashMap<String, UIElement> mergeUIElements(HashMap<String, UIElement> uiElementHashMapOld,

@@ -88,11 +88,11 @@ public class CrawlingInput {
     }
 
     public String getLastUIAction() {
-        return lastUIAction;
+        return Utils.sanitizeText(lastUIAction);
     }
 
     public String getLastScreenTitle() {
-        return lastScreenTitle;
+        return Utils.sanitizeText(lastScreenTitle);
     }
 
     public HashMap<String, String> getDeviceInfo() {

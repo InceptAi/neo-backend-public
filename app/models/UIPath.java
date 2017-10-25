@@ -4,8 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UIPath {
+    public enum UIPathType {
+        HARD_PATH("HARD_PATH"),
+        SOFT_PATH("SOFT_PATH"),
+        UNDEFINED("UNDEFINED");
+
+        private String id;
+
+        UIPathType(String id) {
+            this.id = id;
+        }
+
+        public String id() {
+            return id;
+        }
+    }
+
     private List<UIStep> uiSteps;
     private SemanticActionType semanticActionType = SemanticActionType.UNDEFINED;
+    private UIPathType pathType = UIPathType.UNDEFINED;
 
     private UIPath(UIPath uiPath) {
         this.uiSteps = new ArrayList<>();
@@ -13,6 +30,7 @@ public class UIPath {
             uiSteps.add(UIStep.copyStep(uiStep));
         }
         this.semanticActionType = uiPath.semanticActionType;
+        this.pathType = uiPath.pathType;
     }
 
     //Factory
@@ -27,11 +45,31 @@ public class UIPath {
         this.uiSteps = new ArrayList<>();
         this.uiSteps.add(uiStep);
         this.semanticActionType = semanticActionType;
+        if (uiStep.isSoftStep()) {
+            this.pathType = UIPathType.SOFT_PATH;
+        } else {
+            this.pathType = UIPathType.HARD_PATH;
+        }
     }
 
     public UIPath(SemanticActionType semanticActionType) {
         this.semanticActionType = semanticActionType;
         this.uiSteps = new ArrayList<>();
+        this.pathType = UIPathType.UNDEFINED;
+    }
+
+    public UIPath(SemanticActionType semanticActionType, UIPathType uiPathType) {
+        this.semanticActionType = semanticActionType;
+        this.uiSteps = new ArrayList<>();
+        this.pathType = uiPathType;
+    }
+
+    public UIPathType getPathType() {
+        return pathType;
+    }
+
+    public void setPathType(UIPathType pathType) {
+        this.pathType = pathType;
     }
 
     public List<UIStep> getUiSteps() {
@@ -59,6 +97,11 @@ public class UIPath {
 //            } 
         }
         newUIPath.uiSteps.add(UIStep.copyStep(uiStep));
+        if (uiStep.isSoftStep()) {
+            newUIPath.pathType = UIPathType.SOFT_PATH;
+        } else {
+            newUIPath.pathType = UIPathType.HARD_PATH;
+        }
         return newUIPath;
     }
 
@@ -111,7 +154,7 @@ public class UIPath {
             //Didn't find src, return null
             return null;
         }
-        UIPath subPath = new UIPath(SemanticActionType.NAVIGATE);
+        UIPath subPath = new UIPath(SemanticActionType.NAVIGATE, uiPath.pathType);
         for (int stepIndex = srcIndex; stepIndex < pathLength; stepIndex++) {
             UIStep uiStep = uiPath.uiSteps.get(stepIndex);
             subPath.uiSteps.add(UIStep.copyStep(uiStep));

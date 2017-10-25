@@ -15,7 +15,7 @@ public class ActionResponseHelper {
 
     //Take input the semantic ids and best matching string and create action response
     public static ActionResponse createActionResponse(String inputText, String packageName, String baseScreenTitle,
-                                                      String deviceInfo, PathFinder pathFinder) {
+                                                      String deviceInfo, PathFinder pathFinder, int maxResults) {
         //sanitize the input
         inputText = Utils.sanitizeText(inputText);
         deviceInfo = Utils.sanitizeText(deviceInfo);
@@ -28,18 +28,17 @@ public class ActionResponseHelper {
         }
         List<ActionDetails> actionDetailsList = new ArrayList<>();
         //find top actions first
-        final int MAX_RESULTS = 1;
-        HashMap<String, String> topMatchingActions = new HashMap<>();
+        HashMap<String, SemanticActionStore.SemanticActionMatchingTextAndScore> topMatchingActions;
         if (Utils.nullOrEmpty(deviceInfo) && Utils.nullOrEmpty(inputText)) {
             //return all semantic actions
             topMatchingActions = SemanticActionStore.getInstance().returnAllActions();
         } else {
             topMatchingActions = SemanticActionStore.getInstance().searchActions(inputText,
-                    deviceInfo, new SimpleTextInterpreter(), MAX_RESULTS);
+                    deviceInfo, new SimpleTextInterpreter(), maxResults);
         }
-        for (HashMap.Entry<String, String> entry : topMatchingActions.entrySet()) {
+        for (HashMap.Entry<String, SemanticActionStore.SemanticActionMatchingTextAndScore> entry : topMatchingActions.entrySet()) {
             String actionId = entry.getKey();
-            String description = entry.getValue();
+            SemanticActionStore.SemanticActionMatchingTextAndScore descriptionAndScore = entry.getValue();
             SemanticAction semanticAction = SemanticActionStore.getInstance().getAction(actionId);
             UIScreen dstScreen = UIScreenStore.getInstance().getScreen(semanticAction.getUiScreenId());
             UIScreen srcScreen = UIScreenStore.getInstance().getScreen(startingScreen.getId());
@@ -57,10 +56,14 @@ public class ActionResponseHelper {
                     uiElement.getPackageName(),
                     uiElement.getAllText()); //
 
-            ActionIdentifier actionIdentifier = new ActionIdentifier(dstScreenIdentifier, elementIdentifier, description,
-                    semanticAction.getSemanticActionName());
+            ActionIdentifier actionIdentifier = new ActionIdentifier(
+                    dstScreenIdentifier,
+                    elementIdentifier,
+                    descriptionAndScore.getMatchingDescription(),
+                    semanticAction.getSemanticActionName(),
+                    descriptionAndScore.getConfidenceScore());
             //Create the condition to check for success
-            Condition successCondition = create(semanticAction, description);
+            Condition successCondition = create(semanticAction, descriptionAndScore.getMatchingDescription());
             ActionDetails actionDetails = new ActionDetails(successCondition, navigationIdentifierList, actionIdentifier);
             actionDetailsList.add(actionDetails);
         }

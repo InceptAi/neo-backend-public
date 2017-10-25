@@ -21,7 +21,7 @@ public enum UIAction {
     }
 
     public static UIAction actionStringToEnum(String actionString) {
-        switch (actionString) {
+        switch (actionString.toUpperCase()) {
             case "CLICK":
             case "TYPE_VIEW_CLICKED":
             case "TYPE_VIEW_LONG_CLICKED": //TODO find a diff action for LONG CLICKED
@@ -41,10 +41,11 @@ public enum UIAction {
             case "TYPE_VIEW_SELECTED":
                 return SELECT;
             case "POPUP":
-            case "TYPE_WINDOW_STATE_CHANGED":
                 return POPUP;
             case "CHANGE":
+            case "TYPE_WINDOW_CHANGED":
             case "TYPE_WINDOW_CONTENT_CHANGED":
+            case "TYPE_WINDOW_STATE_CHANGED":
                 return CHANGE;
         }
         return UNDEFINED;

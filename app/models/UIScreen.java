@@ -1,5 +1,6 @@
 package models;
 
+import nlu.SimpleTextInterpreter;
 import util.MergeUtils;
 import util.Utils;
 
@@ -78,7 +79,35 @@ public class UIScreen {
         this.deviceInfo = deviceInfo;
     }
 
-    public List<UIElement> findElementsInScreen(String className, String packageName, String text) {
+    public List<UIElement> findElementsInScreen(String className, String packageName, String text, boolean fuzzySearch) {
+        if (fuzzySearch) {
+            return findElementsInScreenFuzzy(className, packageName, text);
+        } else {
+            return findElementsInScreenStrict(className, packageName, text);
+        }
+    }
+
+
+    private List<UIElement> findElementsInScreenFuzzy(String className, String packageName, String text) {
+        List<UIElement> uiElementListToReturn = new ArrayList<>();
+        HashMap<String, Double> matchingUIElements = new HashMap<>();
+        SimpleTextInterpreter textInterpreter = new SimpleTextInterpreter(0);
+        for (UIElement uiElement: uiElements.values()) {
+            //Do fuzzy search
+            double matchMetric = textInterpreter.getMatchMetric(text, uiElement.getAllText());
+            if ( matchMetric > 0) {
+                matchingUIElements.put(uiElement.id(), matchMetric);
+            }
+        }
+        //Sort the hash map based on match metric
+        Map<String, Double> sortedMetricMap = Utils.sortHashMapByValueDescending(matchingUIElements);
+        for (HashMap.Entry<String, Double> entry : sortedMetricMap.entrySet()) {
+            uiElementListToReturn.add(uiElements.get(entry.getKey()));
+        }
+        return uiElementListToReturn;
+    }
+
+    private List<UIElement> findElementsInScreenStrict(String className, String packageName, String text) {
         List<UIElement> uiElementList = new ArrayList<>();
         for (UIElement uiElement: uiElements.values()) {
             if (uiElement.getClassName().equals(className) &&
